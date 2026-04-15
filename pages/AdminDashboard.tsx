@@ -4,7 +4,9 @@ import { Notice, Service, Doctor, DownloadItem } from '../types';
 import { Plus, Trash2, Pencil, LayoutDashboard, FileText, Users, LogOut, X, UploadCloud, Download, Menu, Briefcase, Layers, UserCircle, Star, FileCheck, AlertCircle, GripVertical, Info, Image as ImageIcon } from 'lucide-react';
 import { NepaliDatePicker } from '../components/NepaliDatePicker';
 import { db } from '../services/firebase';
-import { collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs } from 'firebase/firestore';
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { auth } from '../services/firebase';
 
 interface AdminDashboardProps {
   notices: Notice[];
@@ -31,8 +33,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'notices' | 'services' | 'doctors' | 'downloads'>('notices');
   const [isAdding, setIsAdding] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auth.currentUser) return;
+    try {
+      const credential = EmailAuthProvider.credential(auth.currentUser.email!, currentPassword);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await updatePassword(auth.currentUser, newPassword);
+      setStatusMessage({ type: 'success', text: 'पासवर्ड सफलतापूर्वक परिवर्तन गरियो!' });
+      setNewPassword('');
+      setCurrentPassword('');
+    } catch (error) {
+      setStatusMessage({ type: 'error', text: 'पासवर्ड परिवर्तन गर्न सकिएन। कृपया पुरानो पासवर्ड सही छ भनी सुनिश्चित गर्नुहोस्।' });
+    }
+  };
   
   const refetchData = async () => {
     try {
@@ -375,6 +393,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: 'services', label: 'सेवा', icon: LayoutDashboard },
     { id: 'doctors', label: 'कर्मचारी', icon: Users },
     { id: 'downloads', label: 'डाउनलोड', icon: Download },
+    { id: 'password', label: 'पासवर्ड', icon: UserCircle },
   ];
 
   const renderAddForm = () => {
@@ -881,11 +900,68 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </td>
                     </tr>
                   ))}
+
+                  {activeTab === 'password' && (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8">
+                        <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+                          <h3 className="text-lg font-bold text-slate-900 mb-4">पासवर्ड परिवर्तन गर्नुहोस्</h3>
+                          <form onSubmit={handlePasswordChange} className="space-y-4">
+                            <input
+                              type="password"
+                              placeholder="पुरानो पासवर्ड"
+                              value={currentPassword}
+                              onChange={(e) => setCurrentPassword(e.target.value)}
+                              className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              required
+                            />
+                            <input
+                              type="password"
+                              placeholder="नयाँ पासवर्ड"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              required
+                            />
+                            <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">
+                              पासवर्ड परिवर्तन गर्नुहोस्
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Password Change Form */}
+      <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+        <h3 className="text-lg font-bold text-slate-900 mb-4">पासवर्ड परिवर्तन गर्नुहोस्</h3>
+        <form onSubmit={handlePasswordChange} className="space-y-4">
+          <input
+            type="password"
+            placeholder="पुरानो पासवर्ड"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <input
+            type="password"
+            placeholder="नयाँ पासवर्ड"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">
+            पासवर्ड परिवर्तन गर्नुहोस्
+          </button>
+        </form>
       </div>
       
       {sidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden" />}
