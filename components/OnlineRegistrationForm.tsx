@@ -27,7 +27,14 @@ const OnlineRegistrationForm: React.FC<OnlineRegistrationFormProps> = ({ service
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [regNumber, setRegNumber] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const generateRegNumber = () => {
+    const year = new NepaliDate().getYear();
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return `BA-${year}-${random}`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +48,7 @@ const OnlineRegistrationForm: React.FC<OnlineRegistrationFormProps> = ({ service
 
     try {
       const selectedService = services.find(s => s.id === formData.serviceId);
+      const newRegNumber = generateRegNumber();
       const appointment: Omit<Appointment, 'id'> = {
         patientName: formData.patientName,
         phoneNumber: formData.phoneNumber,
@@ -50,15 +58,14 @@ const OnlineRegistrationForm: React.FC<OnlineRegistrationFormProps> = ({ service
         serviceId: formData.serviceId,
         serviceName: selectedService?.name || 'Unknown Service',
         date: formData.date,
+        registrationNumber: newRegNumber,
         status: 'Pending',
         createdAt: new Date().toISOString()
       };
 
       await addDoc(collection(db, 'appointments'), appointment);
+      setRegNumber(newRegNumber);
       setIsSuccess(true);
-      setTimeout(() => {
-        onClose();
-      }, 3000);
     } catch (err: any) {
       console.error("Error submitting registration:", err);
       setError('दर्ता गर्दा समस्या भयो। कृपया फेरि प्रयास गर्नुहोस्।');
@@ -75,8 +82,12 @@ const OnlineRegistrationForm: React.FC<OnlineRegistrationFormProps> = ({ service
             <CheckCircle2 size={48} />
           </div>
           <h3 className="text-2xl font-black text-slate-900 mb-2">दर्ता सफल भयो!</h3>
+          <div className="bg-blue-50 p-4 rounded-2xl mb-6 border border-blue-100">
+            <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-1">तपाईंको दर्ता नम्बर (Registration No.)</p>
+            <p className="text-3xl font-black text-blue-900 tracking-tight">{regNumber}</p>
+          </div>
           <p className="text-slate-600 font-medium mb-6">
-            तपाईंको अनलाइन दर्ता सफलतापूर्वक प्राप्त भएको छ। अस्पतालबाट तपाईंलाई चाँडै सम्पर्क गरिनेछ।
+            तपाईंको अनलाइन दर्ता सफलतापूर्वक प्राप्त भएको छ। कृपया यो दर्ता नम्बर सुरक्षित राख्नुहोला। अस्पतालबाट तपाईंलाई चाँडै सम्पर्क गरिनेछ।
           </p>
           <button 
             onClick={onClose}

@@ -1091,7 +1091,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-slate-900 text-sm">{app.patientName}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-bold text-slate-900 text-sm">{app.patientName}</p>
+                          <span className="bg-slate-100 text-slate-600 text-[9px] font-black px-1.5 py-0.5 rounded border border-slate-200">
+                            {app.registrationNumber}
+                          </span>
+                        </div>
                         <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
                           <Phone size={10} /> {app.phoneNumber}
                         </p>

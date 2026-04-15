@@ -68,6 +68,7 @@ export interface Appointment {
   serviceId: string;
   serviceName: string;
   date: string;
+  registrationNumber: string;
   status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
   createdAt: string;
 }
