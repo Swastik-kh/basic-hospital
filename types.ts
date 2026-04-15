@@ -33,6 +33,7 @@ export interface Doctor {
   image: string;
   category?: 'CHIEF' | 'STAFF' | 'COMMITTEE' | 'FORMER';
   featuredRole?: 'CHAIRPERSON' | 'CHIEF' | 'INFO_OFFICER'; // Designated slot for Home Page
+  order?: number; // Added Order for sorting
 }
 
 export interface DownloadItem {

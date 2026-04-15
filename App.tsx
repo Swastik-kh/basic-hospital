@@ -76,6 +76,9 @@ const App: React.FC = () => {
         snapshot.forEach((doc) => {
           fetchedData.push({ id: doc.id, ...doc.data() });
         });
+        if (col.name === 'doctors') {
+          fetchedData.sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999));
+        }
         col.setter(fetchedData);
       });
     });

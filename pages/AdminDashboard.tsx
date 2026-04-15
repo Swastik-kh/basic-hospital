@@ -229,7 +229,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     dragOverItem.current = index;
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = async () => {
     if (dragItem.current === null || dragOverItem.current === null) return;
     
     const newList = [...doctors];
@@ -237,9 +237,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     newList.splice(dragItem.current, 1);
     newList.splice(dragOverItem.current, 0, draggedItemContent);
     
+    // Update order in Firestore
+    try {
+      for (let i = 0; i < newList.length; i++) {
+        const docRef = doc(db, 'doctors', newList[i].id);
+        await updateDoc(docRef, { order: i });
+      }
+      updateDoctors(newList);
+      setStatusMessage({ type: 'success', text: 'कर्मचारीको क्रम सफलतापूर्वक सुरक्षित गरियो!' });
+    } catch (error) {
+      console.error("Error updating doctor order:", error);
+      setStatusMessage({ type: 'error', text: 'कर्मचारीको क्रम सुरक्षित गर्दा त्रुटि भयो।' });
+    }
+    
     dragItem.current = null;
     dragOverItem.current = null;
-    updateDoctors(newList);
   };
 
   const handleAddNotice = async () => {
@@ -451,6 +463,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setIsAdding(true);
   };
 
+  const handleEditDoctor = (doctor: Doctor) => {
+    setEditingDoctorId(doctor.id);
+    setStatusMessage(null);
+    setNewDoctor({
+      name: doctor.name,
+      specialization: doctor.specialization,
+      level: doctor.level,
+      department: doctor.department,
+      availability: doctor.availability,
+      contactNumber: doctor.contactNumber || '',
+      image: doctor.image,
+      category: doctor.category,
+      featuredRole: doctor.featuredRole || ''
+    });
+    setIsAdding(true);
+  };
+
   const handleAddDoctor = async () => {
     if (isSaving) return;
     console.log("handleAddDoctor called", newDoctor);
@@ -497,7 +526,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           contactNumber: newDoctor.contactNumber || '',
           image: newDoctor.image || 'https://picsum.photos/seed/doc/400/400',
           category: newDoctor.category as any,
-          featuredRole: newDoctor.featuredRole || null
+          featuredRole: newDoctor.featuredRole || null,
+          order: doctors.length
         };
         try {
           const docRef = await addDoc(collection(db, 'doctors'), item);
