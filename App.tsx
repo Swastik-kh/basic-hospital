@@ -261,7 +261,7 @@ const App: React.FC = () => {
       case 'ADMIN_DASHBOARD':
         return <AdminDashboard notices={notices} services={services} doctors={doctors} downloads={downloads} appointments={appointments} onLogout={handleLogout} updateNotices={setNotices} updateServices={setServices} updateDoctors={setDoctors} updateDownloads={setDownloads} updateAppointments={setAppointments} />;
       default:
-        return <Home notices={notices} services={services} doctors={doctors} setView={setView} />;
+        return <Home notices={notices} services={services} doctors={doctors} setView={setView} setNoticeId={setNoticeId} />;
     }
   };
 
