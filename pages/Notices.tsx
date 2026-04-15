@@ -13,9 +13,9 @@ const Notices: React.FC<NoticesProps> = ({ notices }) => {
   const closeModal = () => setSelectedNotice(null);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-16 relative">
+    <div className="max-w-5xl mx-auto px-8 py-16 relative">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4">सूचना तथा जानकारी</h2>
+        <h2 className="text-5xl font-black text-slate-900 mb-4">सूचना तथा जानकारी</h2>
         <p className="text-slate-600 font-medium">अस्पतालका नवीनतम सूचना, सार्वजनिक सूचना र कर्मचारी आवश्यकता सम्बन्धी जानकारीहरू यहाँ पाउन सक्नुहुन्छ।</p>
       </div>
 
@@ -120,7 +120,7 @@ const Notices: React.FC<NoticesProps> = ({ notices }) => {
               </div>
 
               {selectedNotice.pdfUrl && (
-                <div className="mt-10 p-6 bg-orange-50 rounded-2xl border border-orange-100 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="mt-10 p-6 bg-orange-50 rounded-2xl border border-orange-100 flex flex-row items-center justify-between gap-6">
                   <div className="flex items-center gap-4">
                     <div className="bg-orange-600 text-white p-3 rounded-xl">
                       <FileText size={24} />

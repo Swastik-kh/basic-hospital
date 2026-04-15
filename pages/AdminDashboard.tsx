@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Notice, Service, Doctor, DownloadItem } from '../types';
-import { Plus, Trash2, Pencil, LayoutDashboard, FileText, Users, LogOut, X, UploadCloud, Download, Menu, Briefcase, Layers, UserCircle, Star, FileCheck, AlertCircle, GripVertical, Info, Image as ImageIcon } from 'lucide-react';
+import { Notice, Service, Doctor, DownloadItem, Appointment } from '../types';
+import { Plus, Trash2, Pencil, LayoutDashboard, FileText, Users, LogOut, X, UploadCloud, Download, Menu, Briefcase, Layers, UserCircle, Star, FileCheck, AlertCircle, GripVertical, Info, Image as ImageIcon, CalendarCheck, Phone, ShieldCheck } from 'lucide-react';
 import { NepaliDatePicker } from '../components/NepaliDatePicker';
 import { db } from '../services/firebase';
 import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs } from 'firebase/firestore';
@@ -64,11 +64,13 @@ interface AdminDashboardProps {
   services: Service[];
   doctors: Doctor[];
   downloads: DownloadItem[];
+  appointments: Appointment[];
   onLogout: () => void;
   updateNotices: (n: Notice[]) => void;
   updateServices: (s: Service[]) => void;
   updateDoctors: (d: Doctor[]) => void;
   updateDownloads: (dw: DownloadItem[]) => void;
+  updateAppointments: (a: Appointment[]) => void;
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
@@ -76,13 +78,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   services, 
   doctors, 
   downloads,
+  appointments,
   onLogout, 
   updateNotices,
   updateServices,
   updateDoctors,
-  updateDownloads
+  updateDownloads,
+  updateAppointments
 }) => {
-  const [activeTab, setActiveTab] = useState<'notices' | 'services' | 'doctors' | 'downloads' | 'password'>('notices');
+  const [activeTab, setActiveTab] = useState<'notices' | 'services' | 'doctors' | 'downloads' | 'appointments' | 'password'>('notices');
   const [isAdding, setIsAdding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
@@ -123,6 +127,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         { name: 'doctors', setter: updateDoctors },
         { name: 'services', setter: updateServices },
         { name: 'downloads', setter: updateDownloads },
+        { name: 'appointments', setter: updateAppointments },
       ];
       for (const col of collections) {
         try {
@@ -335,6 +340,33 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  const handleDeleteAppointment = async (id: string) => {
+    if (!window.confirm('के तपाईं यो दर्ता हटाउन चाहनुहुन्छ?')) return;
+    try {
+      try {
+        await deleteDoc(doc(db, 'appointments', id));
+      } catch (err) {
+        throw handleFirestoreError(err, OperationType.DELETE, `appointments/${id}`);
+      }
+      await refetchData();
+    } catch (error) {
+      console.error("Error deleting appointment: ", error);
+    }
+  };
+
+  const handleUpdateAppointmentStatus = async (id: string, status: Appointment['status']) => {
+    try {
+      try {
+        await updateDoc(doc(db, 'appointments', id), { status });
+      } catch (err) {
+        throw handleFirestoreError(err, OperationType.UPDATE, `appointments/${id}`);
+      }
+      await refetchData();
+    } catch (error) {
+      console.error("Error updating appointment status: ", error);
+    }
+  };
+
   const handleDeleteNotice = async (id: string) => {
     try {
       try {
@@ -517,6 +549,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: 'services', label: 'सेवा', icon: LayoutDashboard },
     { id: 'doctors', label: 'कर्मचारी', icon: Users },
     { id: 'downloads', label: 'डाउनलोड', icon: Download },
+    { id: 'appointments', label: 'अनलाइन दर्ता', icon: CalendarCheck },
     { id: 'password', label: 'पासवर्ड', icon: UserCircle },
   ];
 
@@ -857,15 +890,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-50 flex flex-row">
       {/* Sidebar - Desktop */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 ease-in-out flex flex-col`}>
+      <div className="w-64 bg-slate-900 text-white flex flex-col">
         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
           <div>
             <h2 className="text-xl font-black tracking-tight">प्रशासन प्यानल</h2>
             <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold">बेल्टार नगर अस्पताल</p>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden text-slate-400"><X size={20} /></button>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {navTabs.map(tab => (
@@ -893,24 +925,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-screen">
-        {/* Mobile Sub-Header */}
-        <div className="md:hidden bg-white border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 z-40">
-           <button onClick={() => setSidebarOpen(true)} className="p-2 bg-slate-100 rounded-lg text-slate-600"><Menu size={20} /></button>
-           <h3 className="font-black text-slate-900">Admin Panel</h3>
-           <div className="w-10"></div>
-        </div>
-
-        <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div className="flex-1 p-8 overflow-y-auto">
+          <div className="flex flex-row justify-between items-center mb-8 gap-4">
             <h3 className="text-2xl font-black text-slate-900">
               {navTabs.find(t => t.id === activeTab)?.label} व्यवस्थापन
             </h3>
-            <button 
-              onClick={() => isAdding ? closeForm() : setIsAdding(true)}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
-            >
-              {isAdding ? <><X size={18} /> बन्द गर्नुहोस्</> : <><Plus size={18} /> नयाँ थप्नुहोस्</>}
-            </button>
+            {activeTab !== 'appointments' && (
+              <button 
+                onClick={() => isAdding ? closeForm() : setIsAdding(true)}
+                className="w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+              >
+                {isAdding ? <><X size={18} /> बन्द गर्नुहोस्</> : <><Plus size={18} /> नयाँ थप्नुहोस्</>}
+              </button>
+            )}
           </div>
 
           {renderAddForm()}
@@ -921,14 +948,70 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <thead className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-wider">
                   <tr>
                     <th className="px-6 py-4 w-12"></th>
-                    <th className="px-6 py-4">{activeTab === 'doctors' ? 'फोटो' : 'शिर्षक / नाम'}</th>
-                    {activeTab !== 'doctors' && <th className="px-6 py-4">वर्ग / विवरण</th>}
+                    <th className="px-6 py-4">
+                      {activeTab === 'doctors' ? 'फोटो' : activeTab === 'appointments' ? 'बिरामीको विवरण' : 'शिर्षक / नाम'}
+                    </th>
+                    {activeTab !== 'doctors' && activeTab !== 'appointments' && <th className="px-6 py-4">वर्ग / विवरण</th>}
                     {activeTab === 'doctors' && <th className="px-6 py-4">नाम</th>}
                     {activeTab === 'doctors' && <th className="px-6 py-4">विवरण</th>}
+                    {activeTab === 'appointments' && <th className="px-6 py-4">सेवा र मिति</th>}
+                    {activeTab === 'appointments' && <th className="px-6 py-4">अवस्था</th>}
                     <th className="px-6 py-4 text-right">कार्य</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
+                  {activeTab === 'appointments' && appointments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((app) => (
+                    <tr key={app.id} className="hover:bg-slate-50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                          <UserCircle size={18} />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-bold text-slate-900 text-sm">{app.patientName}</p>
+                        <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                          <Phone size={10} /> {app.phoneNumber}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-medium">{app.address}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-blue-50 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
+                            {app.serviceName}
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold text-slate-700 mt-1 flex items-center gap-1">
+                          <CalendarCheck size={12} className="text-slate-400" /> {app.date}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <select 
+                          value={app.status}
+                          onChange={(e) => handleUpdateAppointmentStatus(app.id, e.target.value as any)}
+                          className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg border-none outline-none cursor-pointer ${
+                            app.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                            app.status === 'Confirmed' ? 'bg-green-100 text-green-700' :
+                            app.status === 'Completed' ? 'bg-blue-100 text-blue-700' :
+                            'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          <option value="Pending">प्रतीक्षा</option>
+                          <option value="Confirmed">निश्चित</option>
+                          <option value="Completed">सम्पन्न</option>
+                          <option value="Cancelled">रद्द</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button 
+                          onClick={() => handleDeleteAppointment(app.id)}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+
                   {activeTab === 'doctors' && doctors.map((doc, index) => (
                     <tr 
                       key={doc.id} 
@@ -1033,7 +1116,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                   {activeTab === 'password' && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-8">
+                      <td colSpan={5} className="px-6 py-8">
                         <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-sm border border-slate-200">
                           <h3 className="text-lg font-bold text-slate-900 mb-4">पासवर्ड परिवर्तन गर्नुहोस्</h3>
                           {statusMessage && (

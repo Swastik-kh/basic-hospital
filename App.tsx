@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ViewState, Notice, Service, Doctor, DownloadItem } from './types';
+import { ViewState, Notice, Service, Doctor, DownloadItem, Appointment } from './types';
 import { INITIAL_NOTICES, INITIAL_SERVICES, INITIAL_DOCTORS, INITIAL_DOWNLOADS } from './constants';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   useEffect(() => {
     // Force logout on initial load so admin always has to enter password
@@ -43,6 +44,7 @@ const App: React.FC = () => {
       { name: 'doctors', setter: setDoctors },
       { name: 'services', setter: setServices },
       { name: 'downloads', setter: setDownloads },
+      { name: 'appointments', setter: setAppointments },
     ];
 
     const unsubscribers = collections.map(col => {
@@ -89,24 +91,24 @@ const App: React.FC = () => {
     const filteredStaff = filterCategory ? doctors.filter(d => d.category === filterCategory) : doctors;
     
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-        <div className="text-center mb-10 md:mb-12">
+      <div className="max-w-7xl mx-auto px-8 py-16">
+        <div className="text-center mb-12">
           <div className="inline-flex p-3 bg-blue-50 text-blue-700 rounded-2xl mb-4">
             <Users size={32} />
           </div>
-          <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight">{title}</h2>
-          <p className="text-slate-500 mt-2 font-medium text-sm md:text-base">चौदण्डीगढी नगरपालिका आधारभूत नगर अस्पताल</p>
+          <h2 className="text-5xl font-black text-slate-900 leading-tight">{title}</h2>
+          <p className="text-slate-500 mt-2 font-medium text-base">चौदण्डीगढी नगरपालिका आधारभूत नगर अस्पताल</p>
         </div>
         
         {filteredStaff.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-4 gap-8">
             {filteredStaff.map(doc => (
               <div key={doc.id} className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col h-full">
-                <div className="relative h-56 md:h-64 overflow-hidden">
+                <div className="relative h-64 overflow-hidden">
                   <img src={doc.image} alt={doc.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent"></div>
                   <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-base md:text-lg font-black text-white drop-shadow-md">{doc.name}</h3>
+                    <h3 className="text-lg font-black text-white drop-shadow-md">{doc.name}</h3>
                   </div>
                 </div>
                 <div className="p-6 flex-1 space-y-4">
@@ -117,7 +119,7 @@ const App: React.FC = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">पद</p>
-                        <p className="text-xs md:text-sm font-bold text-slate-900 leading-tight">{doc.specialization}</p>
+                        <p className="text-sm font-bold text-slate-900 leading-tight">{doc.specialization}</p>
                       </div>
                     </div>
 
@@ -127,7 +129,7 @@ const App: React.FC = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">तह</p>
-                        <p className="text-xs md:text-sm font-bold text-slate-900 leading-tight">{doc.level || '-'}</p>
+                        <p className="text-sm font-bold text-slate-900 leading-tight">{doc.level || '-'}</p>
                       </div>
                     </div>
 
@@ -137,12 +139,12 @@ const App: React.FC = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">कार्यरत शाखा</p>
-                        <p className="text-xs md:text-sm font-bold text-slate-900 leading-tight">{doc.department || '-'}</p>
+                        <p className="text-sm font-bold text-slate-900 leading-tight">{doc.department || '-'}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-50 flex justify-between items-center text-[9px] md:text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                  <div className="pt-4 border-t border-slate-50 flex justify-between items-center text-[10px] text-slate-400 font-black uppercase tracking-widest">
                     <span>उपलब्धता:</span>
                     <span className="text-blue-700">{doc.availability}</span>
                   </div>
@@ -151,8 +153,8 @@ const App: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-12 md:p-20 text-center">
-            <p className="text-slate-400 italic font-medium text-base md:text-lg">यस विधामा अहिले कुनै विवरण उपलब्ध छैन।</p>
+          <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-20 text-center">
+            <p className="text-slate-400 italic font-medium text-lg">यस विधामा अहिले कुनै विवरण उपलब्ध छैन।</p>
           </div>
         )}
       </div>
@@ -239,7 +241,7 @@ const App: React.FC = () => {
           </div>
         );
       case 'ADMIN_DASHBOARD':
-        return <AdminDashboard notices={notices} services={services} doctors={doctors} downloads={downloads} onLogout={handleLogout} updateNotices={setNotices} updateServices={setServices} updateDoctors={setDoctors} updateDownloads={setDownloads} />;
+        return <AdminDashboard notices={notices} services={services} doctors={doctors} downloads={downloads} appointments={appointments} onLogout={handleLogout} updateNotices={setNotices} updateServices={setServices} updateDoctors={setDoctors} updateDownloads={setDownloads} updateAppointments={setAppointments} />;
       default:
         return <Home notices={notices} services={services} doctors={doctors} setView={setView} />;
     }

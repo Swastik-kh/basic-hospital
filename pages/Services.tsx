@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Service } from '../types';
 import * as Icons from 'lucide-react';
+import OnlineRegistrationForm from '../components/OnlineRegistrationForm';
 
 interface ServicesProps {
   services: Service[];
@@ -9,19 +10,39 @@ interface ServicesProps {
 
 const Services: React.FC<ServicesProps> = ({ services }) => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [showRegistration, setShowRegistration] = useState(false);
+  const [preSelectedServiceId, setPreSelectedServiceId] = useState<string | undefined>(undefined);
 
   const closeModal = () => setSelectedService(null);
+  const closeRegistration = () => {
+    setShowRegistration(false);
+    setPreSelectedServiceId(undefined);
+  };
+
+  const handleRegisterClick = (serviceId?: string) => {
+    setPreSelectedServiceId(serviceId);
+    setShowRegistration(true);
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-16 relative">
+    <div className="max-w-7xl mx-auto px-8 py-16 relative">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4">हाम्रा स्वास्थ्य सेवाहरू</h2>
-        <p className="text-slate-600 max-w-2xl mx-auto font-medium">
+        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
+          <Icons.Activity size={16} /> अस्पतालका सेवाहरू
+        </div>
+        <h2 className="text-5xl font-black text-slate-900 mb-4">हाम्रा स्वास्थ्य सेवाहरू</h2>
+        <p className="text-slate-600 max-w-2xl mx-auto font-medium mb-8">
           हामी बेल्टारका नागरिकहरूलाई गुणस्तरीय र सुलभ स्वास्थ्य सेवा पुर्याउन प्रतिबद्ध छौं।
         </p>
+        <button 
+          onClick={() => handleRegisterClick()}
+          className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 mx-auto hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 hover:-translate-y-1"
+        >
+          <Icons.UserPlus size={20} /> अनलाइन नाम दर्ता गर्नुहोस्
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-3 gap-8">
         {services.map((service) => {
           const IconComponent = (Icons as any)[service.icon] || Icons.HelpCircle;
           const hasRates = service.testRates && service.testRates.length > 0;
@@ -49,8 +70,14 @@ const Services: React.FC<ServicesProps> = ({ services }) => {
                   <span className="text-slate-400 text-[10px] font-bold">थप जानकारीका लागि सम्पर्क गर्नुहोस्</span>
                 )}
                 
-                <button className={`text-blue-600 font-bold text-sm flex items-center gap-1 transition-opacity ${hasRates ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                  {hasRates ? 'जाँच र दर हेर्नुहोस्' : 'थप जानकारी'} <Icons.ChevronRight size={16} />
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRegisterClick(service.id);
+                  }}
+                  className={`text-blue-600 font-bold text-sm flex items-center gap-1 transition-opacity ${hasRates ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                >
+                  {hasRates ? 'जाँच र दर हेर्नुहोस्' : 'अनलाइन दर्ता'} <Icons.ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -115,6 +142,14 @@ const Services: React.FC<ServicesProps> = ({ services }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {showRegistration && (
+        <OnlineRegistrationForm 
+          services={services} 
+          initialServiceId={preSelectedServiceId}
+          onClose={closeRegistration} 
+        />
       )}
     </div>
   );

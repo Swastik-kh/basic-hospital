@@ -20,13 +20,13 @@ const Downloads: React.FC<DownloadsProps> = ({ downloads }) => {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-16">
+    <div className="max-w-7xl mx-auto px-8 py-16">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4">डाउनलोड र फारमहरू</h2>
+        <h2 className="text-5xl font-black text-slate-900 mb-4">डाउनलोड र फारमहरू</h2>
         <p className="text-slate-600 font-medium">अस्पतालका विभिन्न फारमहरू, प्रतिवेदनहरू र निर्देशिकाहरू यहाँबाट डाउनलोड गर्न सक्नुहुन्छ।</p>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 mb-12 flex flex-col md:flex-row gap-6">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 mb-12 flex flex-row gap-6">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
           <input 
@@ -38,7 +38,7 @@ const Downloads: React.FC<DownloadsProps> = ({ downloads }) => {
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <Filter size={18} className="text-slate-400 mr-2 hidden md:block" />
+          <Filter size={18} className="text-slate-400 mr-2" />
           {categories.map(cat => (
             <button
               key={cat}
@@ -55,7 +55,7 @@ const Downloads: React.FC<DownloadsProps> = ({ downloads }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-6">
         {filteredDownloads.length > 0 ? (
           filteredDownloads.map(item => (
             <div key={item.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all group border-l-4 border-l-blue-600">
@@ -92,11 +92,11 @@ const Downloads: React.FC<DownloadsProps> = ({ downloads }) => {
         )}
       </div>
 
-      <div className="mt-16 bg-blue-50 p-8 rounded-3xl border border-blue-100 flex flex-col md:flex-row items-center gap-8">
+      <div className="mt-16 bg-blue-50 p-8 rounded-3xl border border-blue-100 flex flex-row items-center gap-8">
         <div className="bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
           <FileText size={32} />
         </div>
-        <div className="flex-1 text-center md:text-left">
+        <div className="flex-1 text-left">
           <h4 className="text-xl font-black text-slate-900 mb-2">अन्य आवश्यक कागजात चाहिन्छ?</h4>
           <p className="text-slate-600 font-medium">यदि तपाईंले खोजिरहनुभएको फारम यहाँ छैन भने, कृपया अस्पतालको दर्ता शाखामा सम्पर्क गर्नुहोला।</p>
         </div>

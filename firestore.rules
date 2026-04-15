@@ -1,9 +1,46 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.email == "swastikkhatiwada93@gmail.com");
+    }
+
+    // Default rules for other collections
+    match /notices/{noticeId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /doctors/{doctorId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /downloads/{downloadId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Appointment rules
+    match /appointments/{appointmentId} {
+      // Anyone can create an appointment with valid data
+      allow create: if request.resource.data.keys().hasAll(['patientName', 'phoneNumber', 'age', 'gender', 'address', 'serviceId', 'serviceName', 'date', 'status', 'createdAt'])
+                    && request.resource.data.patientName is string
+                    && request.resource.data.phoneNumber is string
+                    && request.resource.data.status == 'Pending';
+      // Only authenticated admins can read, update, or delete
+      allow read, update, delete: if isAdmin();
     }
   }
 }

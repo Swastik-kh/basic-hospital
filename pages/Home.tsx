@@ -44,42 +44,42 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView }) => {
   return (
     <div className="space-y-0 pb-16">
       {/* Hero Section */}
-      <section className="relative min-h-[400px] md:h-[600px] flex items-center overflow-hidden py-12 md:py-0">
+      <section className="relative h-[600px] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=2000" 
-            className="w-full h-full object-cover brightness-[0.3] md:brightness-[0.4]"
+            className="w-full h-full object-cover brightness-[0.4]"
             alt="अस्पताल भवन"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 md:from-blue-900/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 to-transparent"></div>
         </div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col md:flex-row gap-8 md:gap-12 items-center">
-          <div className="flex-1 text-white text-center md:text-left">
-            <span className="inline-block bg-blue-600/30 backdrop-blur-md px-3 py-1 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest mb-4 border border-blue-400/30">
+        <div className="relative z-10 max-w-7xl mx-auto px-8 w-full flex flex-row gap-12 items-center">
+          <div className="flex-1 text-white text-left">
+            <span className="inline-block bg-blue-600/30 backdrop-blur-md px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-4 border border-blue-400/30">
               आधिकारिक पोर्टलमा स्वागत छ
             </span>
-            <h2 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 leading-tight">तपाईंको स्वास्थ्य,<br/>हाम्रो सर्वोच्च प्राथमिकता</h2>
-            <p className="text-sm md:text-xl mb-6 md:mb-10 opacity-90 font-medium max-w-2xl leading-relaxed md:border-l-4 md:border-blue-500 md:pl-6">
+            <h2 className="text-6xl font-black mb-6 leading-tight">तपाईंको स्वास्थ्य,<br/>हाम्रो सर्वोच्च प्राथमिकता</h2>
+            <p className="text-xl mb-10 opacity-90 font-medium max-w-2xl leading-relaxed border-l-4 border-blue-500 pl-6">
               चौदण्डीगढी नगरपालिकाका बासिन्दाहरूका लागि सुलभ, प्रभावकारी र गुणस्तरीय स्वास्थ्य सेवा उपलब्ध गराउन हामी सधैं तत्पर छौं।
             </p>
-            <div className="flex flex-wrap gap-3 md:gap-4 justify-center md:justify-start">
+            <div className="flex flex-wrap gap-4 justify-start">
               <button 
                 onClick={() => setView('SERVICES')}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-black text-sm transition-all shadow-xl flex items-center gap-2 group"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-black text-sm transition-all shadow-xl flex items-center gap-2 group"
               >
                 हाम्रा सेवाहरू <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
               <button 
                 onClick={() => setView('ABOUT')}
-                className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white border border-white/30 px-6 md:px-8 py-3 md:py-4 rounded-xl font-black text-sm transition-all"
+                className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white border border-white/30 px-8 py-4 rounded-xl font-black text-sm transition-all"
               >
                 हाम्रो बारेमा
               </button>
             </div>
           </div>
 
-          <div className="hidden md:block w-full max-w-[400px]">
+          <div className="w-full max-w-[400px]">
             <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-2xl">
               <div className="flex items-center gap-2 mb-4">
                 <div className="bg-blue-500 p-2 rounded-xl text-white">
@@ -115,32 +115,32 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView }) => {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16 flex flex-col lg:flex-row gap-12 md:gap-16">
+      <div className="max-w-7xl mx-auto px-8 py-16 flex flex-row gap-16">
         {/* Main Content Area */}
-        <div className="flex-1 space-y-8 md:space-y-10">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b-4 border-blue-700 pb-4 gap-4">
+        <div className="flex-1 space-y-10">
+          <div className="flex flex-row items-end justify-between border-b-4 border-blue-700 pb-4 gap-4">
             <div>
-              <h3 className="text-2xl md:text-3xl font-black text-slate-900">सूचना तथा समाचार</h3>
-              <p className="text-slate-500 text-[10px] md:text-sm font-bold mt-1 uppercase tracking-widest">Latest Updates & Notices</p>
+              <h3 className="text-3xl font-black text-slate-900">सूचना तथा समाचार</h3>
+              <p className="text-slate-500 text-sm font-bold mt-1 uppercase tracking-widest">Latest Updates & Notices</p>
             </div>
-            <button onClick={() => setView('NOTICES')} className="text-blue-700 font-black text-sm hover:underline flex items-center gap-1 self-start sm:self-auto">
+            <button onClick={() => setView('NOTICES')} className="text-blue-700 font-black text-sm hover:underline flex items-center gap-1 self-auto">
               सबै हेर्नुहोस् <ChevronRight size={16} />
             </button>
           </div>
           
           <div className="grid gap-6">
             {notices.map((notice) => (
-              <div key={notice.id} className="group bg-white p-6 md:p-8 rounded-2xl border border-slate-200 hover:border-blue-300 shadow-sm hover:shadow-xl transition-all flex flex-col sm:flex-row gap-6">
-                <div className="w-full sm:w-24 md:w-32 sm:h-24 md:h-32 bg-blue-50 rounded-2xl flex flex-row sm:flex-col items-center justify-center text-blue-800 shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors p-4 sm:p-0">
-                  <div className="flex flex-col items-center flex-1 sm:flex-none">
+              <div key={notice.id} className="group bg-white p-8 rounded-2xl border border-slate-200 hover:border-blue-300 shadow-sm hover:shadow-xl transition-all flex flex-row gap-6">
+                <div className="w-32 h-32 bg-blue-50 rounded-2xl flex flex-col items-center justify-center text-blue-800 shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <div className="flex flex-col items-center">
                     <span className="text-[10px] font-black uppercase tracking-tighter opacity-70">{getMonthName(notice.date)}</span>
-                    <span className="text-2xl md:text-3xl font-black">{toNepaliNumerals(notice.date.split('-')[2])}</span>
+                    <span className="text-3xl font-black">{toNepaliNumerals(notice.date.split('-')[2])}</span>
                     <span className="text-[10px] font-bold opacity-70">{toNepaliNumerals(notice.date.split('-')[0])}</span>
                   </div>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className={`px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider ${
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
                       notice.category === 'Emergency' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
                     }`}>
                       {notice.category}
@@ -150,19 +150,19 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView }) => {
                         href={notice.pdfUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-orange-600 hover:text-orange-700 flex items-center gap-1 text-[9px] md:text-[10px] font-black uppercase"
+                        className="text-orange-600 hover:text-orange-700 flex items-center gap-1 text-[10px] font-black uppercase"
                       >
                         <FileDown size={14} /> PDF
                       </a>
                     )}
                   </div>
                   <h4 
-                    className="text-lg md:text-2xl font-black text-slate-900 mb-2 md:mb-3 group-hover:text-blue-700 transition-colors leading-snug cursor-pointer"
+                    className="text-2xl font-black text-slate-900 mb-3 group-hover:text-blue-700 transition-colors leading-snug cursor-pointer"
                     onClick={() => setView('NOTICES')}
                   >
                     {notice.title}
                   </h4>
-                  <p className="text-slate-600 text-xs md:text-sm leading-relaxed line-clamp-2">{notice.content}</p>
+                  <p className="text-slate-600 text-sm leading-relaxed line-clamp-2">{notice.content}</p>
                 </div>
               </div>
             ))}
@@ -170,7 +170,7 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView }) => {
         </div>
 
         {/* Sidebar */}
-        <div className="w-full lg:w-1/3 space-y-8">
+        <div className="w-1/3 space-y-8">
           
           {/* Key Officials Section */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">

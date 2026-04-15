@@ -52,4 +52,19 @@ export type ViewState =
   | 'FORMER_STAFF'
   | 'CHIEFS'
   | 'CURRENT_STAFF'
-  | 'DOWNLOADS';
+  | 'DOWNLOADS'
+  | 'APPOINTMENT';
+
+export interface Appointment {
+  id: string;
+  patientName: string;
+  phoneNumber: string;
+  age: string;
+  gender: 'Male' | 'Female' | 'Other';
+  address: string;
+  serviceId: string;
+  serviceName: string;
+  date: string;
+  status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
+  createdAt: string;
+}

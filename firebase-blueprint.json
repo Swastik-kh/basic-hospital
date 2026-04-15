@@ -1,0 +1,28 @@
+{
+  "entities": {
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Online registration for hospital services",
+      "type": "object",
+      "properties": {
+        "patientName": { "type": "string", "description": "Name of the patient" },
+        "phoneNumber": { "type": "string", "description": "Contact number" },
+        "age": { "type": "string", "description": "Age of the patient" },
+        "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
+        "address": { "type": "string", "description": "Address of the patient" },
+        "serviceId": { "type": "string", "description": "ID of the service requested" },
+        "serviceName": { "type": "string", "description": "Name of the service requested" },
+        "date": { "type": "string", "description": "Requested date for the service" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Completed", "Cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["patientName", "phoneNumber", "serviceId", "date"]
+    }
+  },
+  "firestore": {
+    "/appointments/{appointmentId}": {
+      "schema": "Appointment",
+      "description": "Collection of online service registrations"
+    }
+  }
+}
