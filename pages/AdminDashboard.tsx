@@ -33,6 +33,27 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [isAdding, setIsAdding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  
+  const refetchData = async () => {
+    try {
+      const collections = [
+        { name: 'notices', setter: updateNotices },
+        { name: 'doctors', setter: updateDoctors },
+        { name: 'services', setter: updateServices },
+        { name: 'downloads', setter: updateDownloads },
+      ];
+      for (const col of collections) {
+        const querySnapshot = await getDocs(collection(db, col.name));
+        const fetchedData: any[] = [];
+        querySnapshot.forEach((doc) => {
+          fetchedData.push({ id: doc.id, ...doc.data() });
+        });
+        col.setter(fetchedData);
+      }
+    } catch (error) {
+      console.error("Error refetching data: ", error);
+    }
+  };
   const [editingDoctorId, setEditingDoctorId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -138,7 +159,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     try {
       const docRef = await addDoc(collection(db, 'notices'), item);
       console.log("Notice added with ID: ", docRef.id);
-      updateNotices([{ id: docRef.id, ...item }, ...notices]);
+      await refetchData();
       setStatusMessage({ type: 'success', text: 'सूचना सफलतापूर्वक सुरक्षित गरियो!' });
       setTimeout(() => {
         setIsAdding(false);
@@ -174,7 +195,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     try {
       const docRef = await addDoc(collection(db, 'downloads'), item);
       console.log("Download added with ID: ", docRef.id);
-      updateDownloads([{ id: docRef.id, ...item }, ...downloads]);
+      await refetchData();
       setStatusMessage({ type: 'success', text: 'डाउनलोड फाइल सफलतापूर्वक सुरक्षित गरियो!' });
       setTimeout(() => {
         setIsAdding(false);
@@ -191,7 +212,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleDeleteDownload = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'downloads', id));
-      updateDownloads(downloads.filter(d => d.id !== id));
+      await refetchData();
     } catch (error) {
       console.error("Error deleting download: ", error);
     }
@@ -200,7 +221,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleDeleteNotice = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'notices', id));
-      updateNotices(notices.filter(n => n.id !== id));
+      await refetchData();
     } catch (error) {
       console.error("Error deleting notice: ", error);
     }
@@ -227,7 +248,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     try {
       const docRef = await addDoc(collection(db, 'services'), item);
       console.log("Service added with ID: ", docRef.id);
-      updateServices([...services, { id: docRef.id, ...item }]);
+      await refetchData();
       setStatusMessage({ type: 'success', text: 'सेवा सफलतापूर्वक सुरक्षित गरियो!' });
       setTimeout(() => {
         setIsAdding(false);
@@ -244,7 +265,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleDeleteService = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'services', id));
-      updateServices(services.filter(s => s.id !== id));
+      await refetchData();
     } catch (error) {
       console.error("Error deleting service: ", error);
     }
@@ -307,7 +328,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         };
         const docRef = await addDoc(collection(db, 'doctors'), item);
         console.log("Doctor added with ID: ", docRef.id);
-        updateDoctors([...doctors, { id: docRef.id, ...item }]);
+        await refetchData();
         setStatusMessage({ type: 'success', text: 'कर्मचारी सफलतापूर्वक थपियो!' });
       }
       setTimeout(() => {
@@ -329,7 +350,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleDeleteDoctor = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'doctors', id));
-      updateDoctors(doctors.filter(d => d.id !== id));
+      await refetchData();
     } catch (error) {
       console.error("Error deleting doctor: ", error);
     }
