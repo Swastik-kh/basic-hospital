@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Notice } from '../types';
 import { Calendar, Tag, ChevronRight, X, Info, FileDown, FileText } from 'lucide-react';
 
