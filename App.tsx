@@ -30,9 +30,14 @@ const App: React.FC = () => {
 
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get('view') as ViewState;
-    if (viewParam) {
+    
+    // Only allow ADMIN_DASHBOARD if user is authenticated (which they won't be on initial load)
+    if (viewParam === 'ADMIN_DASHBOARD') {
+      setView('ADMIN_LOGIN');
+    } else if (viewParam) {
       setView(viewParam);
     }
+    
     const idParam = params.get('id');
     if (idParam) {
       setNoticeId(idParam);
@@ -259,7 +264,53 @@ const App: React.FC = () => {
           </div>
         );
       case 'ADMIN_DASHBOARD':
-        return <AdminDashboard notices={notices} services={services} doctors={doctors} downloads={downloads} appointments={appointments} onLogout={handleLogout} updateNotices={setNotices} updateServices={setServices} updateDoctors={setDoctors} updateDownloads={setDownloads} updateAppointments={setAppointments} />;
+        return isAdmin ? <AdminDashboard notices={notices} services={services} doctors={doctors} downloads={downloads} appointments={appointments} onLogout={handleLogout} updateNotices={setNotices} updateServices={setServices} updateDoctors={setDoctors} updateDownloads={setDownloads} updateAppointments={setAppointments} /> : (
+          <div className="max-w-md mx-auto py-16 md:py-24 px-4">
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
+              <div className="bg-blue-800 p-6 md:p-8 text-center text-white">
+                <ShieldIcon size={48} className="mx-auto mb-4 opacity-80" />
+                <h2 className="text-xl md:text-2xl font-black">प्रशासनिक क्षेत्र</h2>
+                <p className="text-xs md:text-sm opacity-70 mt-1">बेल्टार अस्पताल प्रशासनिक लगइन</p>
+              </div>
+              <form onSubmit={handleLogin} className="p-6 md:p-8 space-y-6">
+                {loginError && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-lg text-[10px] md:text-xs font-bold flex items-center gap-2">
+                    <AlertIcon size={16} /> {loginError}
+                  </div>
+                )}
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="username" className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">इमेल (Email)</label>
+                    <input 
+                      id="username"
+                      name="username"
+                      type="email" 
+                      required
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      placeholder="admin@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="password" className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">पासवर्ड</label>
+                    <input 
+                      id="password"
+                      name="password"
+                      type="password" 
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      placeholder="Password"
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="w-full bg-blue-800 text-white py-4 rounded-xl font-black flex items-center justify-center gap-2 shadow-lg hover:bg-blue-900 transition-all active:scale-95"><LogInIcon size={20} /> लग-इन गर्नुहोस्</button>
+              </form>
+            </div>
+          </div>
+        );
       default:
         return <Home notices={notices} services={services} doctors={doctors} setView={setView} setNoticeId={setNoticeId} />;
     }
