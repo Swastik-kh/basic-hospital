@@ -118,13 +118,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       console.log("Validation failed: title or content missing");
       return;
     }
-    const item: Omit<Notice, 'id'> = {
+    const item: any = {
       title: newNotice.title,
       content: newNotice.content,
       date: newNotice.date || new Date().toLocaleDateString('ne-NP').replace(/\//g, '-'),
       category: newNotice.category as any,
-      pdfUrl: newNotice.pdfUrl.trim() || undefined
     };
+    if (newNotice.pdfUrl.trim()) {
+      item.pdfUrl = newNotice.pdfUrl.trim();
+    }
     console.log("Attempting to add notice to Firestore:", item);
     try {
       const docRef = await addDoc(collection(db, 'notices'), item);
@@ -138,7 +140,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleAddDownload = async () => {
+    console.log("handleAddDownload called", newDownload);
     if (!newDownload.title || !newDownload.fileUrl) {
+      console.log("Validation failed: title or fileUrl missing");
       alert('कृपया फाइलको शीर्षक र फाइल दुबै छान्नुहोस्।');
       return;
     }
@@ -148,8 +152,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       fileUrl: newDownload.fileUrl,
       date: newDownload.date || new Date().toLocaleDateString('ne-NP').replace(/\//g, '-')
     };
+    console.log("Attempting to add download to Firestore:", item);
     try {
       const docRef = await addDoc(collection(db, 'downloads'), item);
+      console.log("Download added with ID: ", docRef.id);
       updateDownloads([{ id: docRef.id, ...item }, ...downloads]);
       setIsAdding(false);
       setNewDownload({ title: '', category: 'Form', fileUrl: '', fileName: '', date: '' });
@@ -181,15 +187,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleAddService = async () => {
-    if (!newService.name || !newService.description) return;
+    console.log("handleAddService called", newService);
+    if (!newService.name || !newService.description) {
+      console.log("Validation failed: name or description missing");
+      return;
+    }
     const item: Omit<Service, 'id'> = {
       name: newService.name,
       description: newService.description,
       icon: newService.icon,
       testRates: []
     };
+    console.log("Attempting to add service to Firestore:", item);
     try {
       const docRef = await addDoc(collection(db, 'services'), item);
+      console.log("Service added with ID: ", docRef.id);
       updateServices([...services, { id: docRef.id, ...item }]);
       setIsAdding(false);
       setNewService({ name: '', description: '', icon: 'Stethoscope' });
@@ -225,11 +237,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleAddDoctor = async () => {
-    if (!newDoctor.name || !newDoctor.specialization) return;
+    console.log("handleAddDoctor called", newDoctor);
+    if (!newDoctor.name || !newDoctor.specialization) {
+      console.log("Validation failed: name or specialization missing");
+      return;
+    }
     
     try {
       if (editingDoctorId) {
-        // Update existing
+        console.log("Attempting to update doctor in Firestore:", editingDoctorId, newDoctor);
         const docRef = doc(db, 'doctors', editingDoctorId);
         await updateDoc(docRef, {
           name: newDoctor.name,
@@ -241,9 +257,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           category: newDoctor.category as any,
           featuredRole: (newDoctor.featuredRole as any) || undefined
         });
+        console.log("Doctor updated");
         updateDoctors(doctors.map(d => d.id === editingDoctorId ? { ...d, ...newDoctor } : d));
       } else {
-        // Add new
+        console.log("Attempting to add doctor to Firestore:", newDoctor);
         const item: Omit<Doctor, 'id'> = {
           name: newDoctor.name,
           specialization: newDoctor.specialization,
@@ -255,6 +272,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           featuredRole: (newDoctor.featuredRole as any) || undefined
         };
         const docRef = await addDoc(collection(db, 'doctors'), item);
+        console.log("Doctor added with ID: ", docRef.id);
         updateDoctors([...doctors, { id: docRef.id, ...item }]);
       }
       setIsAdding(false);
