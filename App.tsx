@@ -16,10 +16,10 @@ import { collection, getDocs } from 'firebase/firestore';
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('HOME');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [notices, setNotices] = useState<Notice[]>(INITIAL_NOTICES);
-  const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
-  const [doctors, setDoctors] = useState<Doctor[]>(INITIAL_DOCTORS);
-  const [downloads, setDownloads] = useState<DownloadItem[]>(INITIAL_DOWNLOADS);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [downloads, setDownloads] = useState<DownloadItem[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
