@@ -31,6 +31,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'notices' | 'services' | 'doctors' | 'downloads'>('notices');
   const [isAdding, setIsAdding] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [editingDoctorId, setEditingDoctorId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -113,11 +115,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleAddNotice = async () => {
+    if (isSaving) return;
     console.log("handleAddNotice called", newNotice);
     if (!newNotice.title || !newNotice.content) {
       console.log("Validation failed: title or content missing");
       return;
     }
+    
+    setIsSaving(true);
+    setStatusMessage(null);
+
     const item: any = {
       title: newNotice.title,
       content: newNotice.content,
@@ -132,20 +139,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const docRef = await addDoc(collection(db, 'notices'), item);
       console.log("Notice added with ID: ", docRef.id);
       updateNotices([{ id: docRef.id, ...item }, ...notices]);
-      setIsAdding(false);
-      setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
+      setStatusMessage({ type: 'success', text: 'सूचना सफलतापूर्वक सुरक्षित गरियो!' });
+      setTimeout(() => {
+        setIsAdding(false);
+        setIsSaving(false);
+        setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
+      }, 1500);
     } catch (error) {
       console.error("Error adding notice: ", error);
+      setStatusMessage({ type: 'error', text: 'सूचना सुरक्षित गर्दा त्रुटि भयो।' });
+      setIsSaving(false);
     }
   };
 
   const handleAddDownload = async () => {
+    if (isSaving) return;
     console.log("handleAddDownload called", newDownload);
     if (!newDownload.title || !newDownload.fileUrl) {
       console.log("Validation failed: title or fileUrl missing");
       alert('कृपया फाइलको शीर्षक र फाइल दुबै छान्नुहोस्।');
       return;
     }
+    
+    setIsSaving(true);
+    setStatusMessage(null);
+
     const item: Omit<DownloadItem, 'id'> = {
       title: newDownload.title,
       category: newDownload.category as any,
@@ -157,41 +175,48 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const docRef = await addDoc(collection(db, 'downloads'), item);
       console.log("Download added with ID: ", docRef.id);
       updateDownloads([{ id: docRef.id, ...item }, ...downloads]);
-      setIsAdding(false);
-      setNewDownload({ title: '', category: 'Form', fileUrl: '', fileName: '', date: '' });
+      setStatusMessage({ type: 'success', text: 'डाउनलोड फाइल सफलतापूर्वक सुरक्षित गरियो!' });
+      setTimeout(() => {
+        setIsAdding(false);
+        setIsSaving(false);
+        setNewDownload({ title: '', category: 'Form', fileUrl: '', fileName: '', date: '' });
+      }, 1500);
     } catch (error) {
       console.error("Error adding download: ", error);
+      setStatusMessage({ type: 'error', text: 'डाउनलोड फाइल सुरक्षित गर्दा त्रुटि भयो।' });
+      setIsSaving(false);
     }
   };
 
   const handleDeleteDownload = async (id: string) => {
-    if(confirm('के तपाईं यो फाइल हटाउन चाहनुहुन्छ?')) {
-      try {
-        await deleteDoc(doc(db, 'downloads', id));
-        updateDownloads(downloads.filter(d => d.id !== id));
-      } catch (error) {
-        console.error("Error deleting download: ", error);
-      }
+    try {
+      await deleteDoc(doc(db, 'downloads', id));
+      updateDownloads(downloads.filter(d => d.id !== id));
+    } catch (error) {
+      console.error("Error deleting download: ", error);
     }
   };
 
   const handleDeleteNotice = async (id: string) => {
-    if(confirm('के तपाईं यो सूचना हटाउन चाहनुहुन्छ?')) {
-      try {
-        await deleteDoc(doc(db, 'notices', id));
-        updateNotices(notices.filter(n => n.id !== id));
-      } catch (error) {
-        console.error("Error deleting notice: ", error);
-      }
+    try {
+      await deleteDoc(doc(db, 'notices', id));
+      updateNotices(notices.filter(n => n.id !== id));
+    } catch (error) {
+      console.error("Error deleting notice: ", error);
     }
   };
 
   const handleAddService = async () => {
+    if (isSaving) return;
     console.log("handleAddService called", newService);
     if (!newService.name || !newService.description) {
       console.log("Validation failed: name or description missing");
       return;
     }
+    
+    setIsSaving(true);
+    setStatusMessage(null);
+
     const item: Omit<Service, 'id'> = {
       name: newService.name,
       description: newService.description,
@@ -203,21 +228,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const docRef = await addDoc(collection(db, 'services'), item);
       console.log("Service added with ID: ", docRef.id);
       updateServices([...services, { id: docRef.id, ...item }]);
-      setIsAdding(false);
-      setNewService({ name: '', description: '', icon: 'Stethoscope' });
+      setStatusMessage({ type: 'success', text: 'सेवा सफलतापूर्वक सुरक्षित गरियो!' });
+      setTimeout(() => {
+        setIsAdding(false);
+        setIsSaving(false);
+        setNewService({ name: '', description: '', icon: 'Stethoscope' });
+      }, 1500);
     } catch (error) {
       console.error("Error adding service: ", error);
+      setStatusMessage({ type: 'error', text: 'सेवा सुरक्षित गर्दा त्रुटि भयो।' });
+      setIsSaving(false);
     }
   };
 
   const handleDeleteService = async (id: string) => {
-    if(confirm('के तपाईं यो सेवा हटाउन चाहनुहुन्छ?')) {
-      try {
-        await deleteDoc(doc(db, 'services', id));
-        updateServices(services.filter(s => s.id !== id));
-      } catch (error) {
-        console.error("Error deleting service: ", error);
-      }
+    try {
+      await deleteDoc(doc(db, 'services', id));
+      updateServices(services.filter(s => s.id !== id));
+    } catch (error) {
+      console.error("Error deleting service: ", error);
     }
   };
 
@@ -237,12 +266,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleAddDoctor = async () => {
+    if (isSaving) return;
     console.log("handleAddDoctor called", newDoctor);
     if (!newDoctor.name || !newDoctor.specialization) {
       console.log("Validation failed: name or specialization missing");
       return;
     }
     
+    setIsSaving(true);
+    setStatusMessage(null);
+
     try {
       if (editingDoctorId) {
         console.log("Attempting to update doctor in Firestore:", editingDoctorId, newDoctor);
@@ -259,6 +292,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         });
         console.log("Doctor updated");
         updateDoctors(doctors.map(d => d.id === editingDoctorId ? { ...d, ...newDoctor } : d));
+        setStatusMessage({ type: 'success', text: 'कर्मचारी सफलतापूर्वक अपडेट गरियो!' });
       } else {
         console.log("Attempting to add doctor to Firestore:", newDoctor);
         const item: Omit<Doctor, 'id'> = {
@@ -274,26 +308,30 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const docRef = await addDoc(collection(db, 'doctors'), item);
         console.log("Doctor added with ID: ", docRef.id);
         updateDoctors([...doctors, { id: docRef.id, ...item }]);
+        setStatusMessage({ type: 'success', text: 'कर्मचारी सफलतापूर्वक थपियो!' });
       }
-      setIsAdding(false);
-      setEditingDoctorId(null);
-      setNewDoctor({ 
-        name: '', specialization: '', level: '', department: '', 
-        availability: '', image: '', category: 'STAFF', featuredRole: '' 
-      });
+      setTimeout(() => {
+        setIsAdding(false);
+        setIsSaving(false);
+        setEditingDoctorId(null);
+        setNewDoctor({ 
+          name: '', specialization: '', level: '', department: '', 
+          availability: '', image: '', category: 'STAFF', featuredRole: '' 
+        });
+      }, 1500);
     } catch (error) {
       console.error("Error adding/updating doctor: ", error);
+      setStatusMessage({ type: 'error', text: 'कर्मचारी सुरक्षित गर्दा त्रुटि भयो।' });
+      setIsSaving(false);
     }
   };
 
   const handleDeleteDoctor = async (id: string) => {
-    if(confirm('के तपाईं यो कर्मचारीलाई हटाउन चाहनुहुन्छ? यो कार्य फिर्ता लिन सकिने छैन।')) {
-      try {
-        await deleteDoc(doc(db, 'doctors', id));
-        updateDoctors(doctors.filter(d => d.id !== id));
-      } catch (error) {
-        console.error("Error deleting doctor: ", error);
-      }
+    try {
+      await deleteDoc(doc(db, 'doctors', id));
+      updateDoctors(doctors.filter(d => d.id !== id));
+    } catch (error) {
+      console.error("Error deleting doctor: ", error);
     }
   };
 
@@ -326,6 +364,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </h4>
           <button onClick={closeForm} className="p-2 bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"><X size={20} /></button>
         </div>
+
+        {statusMessage && (
+          <div className={`p-4 mb-4 rounded-xl text-sm font-bold ${statusMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {statusMessage.text}
+          </div>
+        )}
 
         {activeTab === 'notices' && (
           <div className="space-y-6">
@@ -421,7 +465,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             )}
 
-            <button onClick={handleAddNotice} className="bg-blue-600 text-white px-6 py-4 rounded-xl font-black w-full shadow-md hover:bg-blue-700 transition-all active:scale-[0.98]">सूचना सुरक्षित गर्नुहोस्</button>
+            <button onClick={handleAddNotice} disabled={isSaving} className={`bg-blue-600 text-white px-6 py-4 rounded-xl font-black w-full shadow-md hover:bg-blue-700 transition-all active:scale-[0.98] ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              {isSaving ? 'सुरक्षित हुँदै...' : 'सूचना सुरक्षित गर्नुहोस्'}
+            </button>
           </div>
         )}
 
@@ -495,7 +541,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <p className="text-[10px] md:text-xs text-blue-800 font-medium">तपाईंले यहाँ अपलोड गर्ने फाइल स्थानीय रूपमा सुरक्षित हुनेछ। ठूला फाइलहरूको सट्टा पिडिएफ (PDF) वा इमेज (Image) प्रयोग गर्न सिफारिस गरिन्छ।</p>
             </div>
 
-            <button onClick={handleAddDownload} className="bg-blue-600 text-white px-6 py-4 rounded-xl font-black w-full shadow-md hover:bg-blue-700 transition-all active:scale-[0.98]">डाउनलोड फाइल सुरक्षित गर्नुहोस्</button>
+            <button onClick={handleAddDownload} disabled={isSaving} className={`bg-blue-600 text-white px-6 py-4 rounded-xl font-black w-full shadow-md hover:bg-blue-700 transition-all active:scale-[0.98] ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              {isSaving ? 'सुरक्षित हुँदै...' : 'डाउनलोड फाइल सुरक्षित गर्नुहोस्'}
+            </button>
           </div>
         )}
 
@@ -511,7 +559,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <option value="Activity">Activity (Radiology)</option>
             </select>
             <textarea placeholder="सेवाको विवरण" className="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
-            <button onClick={handleAddService} className="bg-blue-600 text-white px-6 py-4 rounded-xl font-black w-full shadow-md hover:bg-blue-700 transition-all active:scale-[0.98]">सेवा सुरक्षित गर्नुहोस्</button>
+            <button onClick={handleAddService} disabled={isSaving} className={`bg-blue-600 text-white px-6 py-4 rounded-xl font-black w-full shadow-md hover:bg-blue-700 transition-all active:scale-[0.98] ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              {isSaving ? 'सुरक्षित हुँदै...' : 'सेवा सुरक्षित गर्नुहोस्'}
+            </button>
           </div>
         )}
 
@@ -629,8 +679,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             </div>
             
-            <button onClick={handleAddDoctor} className="bg-blue-600 text-white px-6 py-5 rounded-2xl font-black w-full shadow-xl hover:bg-blue-700 transition-all active:scale-[0.98] text-lg">
-              {editingDoctorId ? 'परिवर्तन सुरक्षित गर्नुहोस्' : 'नयाँ कर्मचारी सुरक्षित गर्नुहोस्'}
+            <button onClick={handleAddDoctor} disabled={isSaving} className={`bg-blue-600 text-white px-6 py-5 rounded-2xl font-black w-full shadow-xl hover:bg-blue-700 transition-all active:scale-[0.98] text-lg ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              {isSaving ? 'सुरक्षित हुँदै...' : (editingDoctorId ? 'परिवर्तन सुरक्षित गर्नुहोस्' : 'नयाँ कर्मचारी सुरक्षित गर्नुहोस्')}
             </button>
           </div>
         )}
