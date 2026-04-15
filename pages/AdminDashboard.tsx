@@ -157,6 +157,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
     console.log("Attempting to add notice to Firestore:", item);
     try {
+      console.log("Adding doc to collection 'notices' in db:", db);
       const docRef = await addDoc(collection(db, 'notices'), item);
       console.log("Notice added with ID: ", docRef.id);
       await refetchData();
@@ -167,8 +168,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
       }, 1500);
     } catch (error) {
-      console.error("Error adding notice: ", error);
-      setStatusMessage({ type: 'error', text: 'सूचना सुरक्षित गर्दा त्रुटि भयो।' });
+      console.error("Error adding notice to Firestore:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+      }
+      setStatusMessage({ type: 'error', text: `सूचना सुरक्षित गर्दा त्रुटि भयो: ${error instanceof Error ? error.message : 'Unknown error'}` });
       setIsSaving(false);
     }
   };
