@@ -123,6 +123,7 @@ const Notices: React.FC<NoticesProps> = ({ notices, noticeId }) => {
                 <div>
                   <h3 className="text-xl font-bold leading-tight">सूचनाको विवरण</h3>
                   <p className="text-xs text-blue-200 font-medium">चौदण्डीगढी नगरपालिका स्वास्थ्य शाखा</p>
+                  <p className="text-xs text-blue-200 font-medium">आधारभूत नगर अस्पताल, बेल्टार</p>
                 </div>
               </div>
               <button onClick={closeModal} className="p-2 hover:bg-white/10 rounded-full transition-colors">
