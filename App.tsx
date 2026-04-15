@@ -11,7 +11,7 @@ import Downloads from './pages/Downloads';
 import AdminDashboard from './pages/AdminDashboard';
 import { LogIn as LogInIcon, ShieldCheck as ShieldIcon, AlertCircle as AlertIcon, Users, MapPin, Layers, Briefcase } from 'lucide-react';
 import { db } from './services/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot } from 'firebase/firestore';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('HOME');
@@ -22,28 +22,24 @@ const App: React.FC = () => {
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const collections = [
-          { name: 'notices', setter: setNotices },
-          { name: 'doctors', setter: setDoctors },
-          { name: 'services', setter: setServices },
-          { name: 'downloads', setter: setDownloads },
-        ];
+    const collections = [
+      { name: 'notices', setter: setNotices },
+      { name: 'doctors', setter: setDoctors },
+      { name: 'services', setter: setServices },
+      { name: 'downloads', setter: setDownloads },
+    ];
 
-        for (const col of collections) {
-          const querySnapshot = await getDocs(collection(db, col.name));
-          const fetchedData: any[] = [];
-          querySnapshot.forEach((doc) => {
-            fetchedData.push({ id: doc.id, ...doc.data() });
-          });
-          col.setter(fetchedData);
-        }
-      } catch (error) {
-        console.error("Error fetching data: ", error);
-      }
-    };
-    fetchData();
+    const unsubscribers = collections.map(col => {
+      return onSnapshot(collection(db, col.name), (snapshot) => {
+        const fetchedData: any[] = [];
+        snapshot.forEach((doc) => {
+          fetchedData.push({ id: doc.id, ...doc.data() });
+        });
+        col.setter(fetchedData);
+      });
+    });
+
+    return () => unsubscribers.forEach(unsub => unsub());
   }, []);
 
   const [username, setUsername] = useState('');
