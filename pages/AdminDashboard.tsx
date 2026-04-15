@@ -97,7 +97,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [tempSettings, setTempSettings] = useState<HospitalSettings>({
     ambulanceContact: '',
     inquiryContact: '',
-    officeContact: ''
+    officeContact: '',
+    email: ''
   });
 
   useEffect(() => {
@@ -1279,6 +1280,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                 onChange={(e) => setTempSettings({...tempSettings, officeContact: e.target.value})}
                                 className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 placeholder="+९७७-०३५-XXXXXX"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">इमेल ठेगाना</label>
+                              <input
+                                type="email"
+                                value={tempSettings.email}
+                                onChange={(e) => setTempSettings({...tempSettings, email: e.target.value})}
+                                className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="info@beltarhospital.gov.np"
                                 required
                               />
                             </div>

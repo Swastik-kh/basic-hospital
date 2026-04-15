@@ -25,7 +25,7 @@ const Footer: React.FC<FooterProps> = ({ settings }) => {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="text-blue-400" size={20} />
-                <p>info@beltarhospital.gov.np</p>
+                <p>{settings?.email || 'info@beltarhospital.gov.np'}</p>
               </div>
             </div>
           </div>

@@ -76,4 +76,5 @@ export interface HospitalSettings {
   ambulanceContact: string;
   inquiryContact: string;
   officeContact: string;
+  email: string;
 }

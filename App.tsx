@@ -93,7 +93,8 @@ const App: React.FC = () => {
         setSettings({
           ambulanceContact: '१०२ / ९८४२०XXXXX',
           inquiryContact: '०३५-४४XXXX',
-          officeContact: '+९७७-०३५-XXXXXX'
+          officeContact: '+९७७-०३५-XXXXXX',
+          email: 'info@beltarhospital.gov.np'
         });
       }
     });
