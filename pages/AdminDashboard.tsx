@@ -8,6 +8,57 @@ import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs } from 'firebase
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { auth } from '../services/firebase';
 
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
+
+const handleFirestoreError = (error: unknown, operationType: OperationType, path: string | null) => {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  return new Error(JSON.stringify(errInfo));
+};
+
 interface AdminDashboardProps {
   notices: Notice[];
   services: Service[];
@@ -70,12 +121,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         { name: 'downloads', setter: updateDownloads },
       ];
       for (const col of collections) {
-        const querySnapshot = await getDocs(collection(db, col.name));
-        const fetchedData: any[] = [];
-        querySnapshot.forEach((doc) => {
-          fetchedData.push({ id: doc.id, ...doc.data() });
-        });
-        col.setter(fetchedData);
+        try {
+          const querySnapshot = await getDocs(collection(db, col.name));
+          const fetchedData: any[] = [];
+          querySnapshot.forEach((doc) => {
+            fetchedData.push({ id: doc.id, ...doc.data() });
+          });
+          col.setter(fetchedData);
+        } catch (err) {
+          throw handleFirestoreError(err, OperationType.LIST, col.name);
+        }
       }
     } catch (error) {
       console.error("Error refetching data: ", error);
@@ -102,6 +157,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (limit to 800KB to stay safe within 1MB Firestore limit)
+      if (file.size > 800 * 1024) {
+        setStatusMessage({ type: 'error', text: 'फोटो धेरै ठूलो भयो। कृपया ८००KB भन्दा सानो फोटो छान्नुहोस्।' });
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setNewDoctor({ ...newDoctor, image: reader.result as string });
@@ -113,6 +173,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (limit to 800KB)
+      if (file.size > 800 * 1024) {
+        setStatusMessage({ type: 'error', text: 'फाइल धेरै ठूलो भयो। कृपया ८००KB भन्दा सानो फाइल छान्नुहोस्।' });
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setNewDownload({ 
@@ -128,6 +193,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleNoticeFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (limit to 800KB)
+      if (file.size > 800 * 1024) {
+        setStatusMessage({ type: 'error', text: 'फाइल धेरै ठूलो भयो। कृपया ८००KB भन्दा सानो फाइल छान्नुहोस्।' });
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setNewNotice({ 
@@ -167,6 +237,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     console.log("handleAddNotice called", newNotice);
     if (!newNotice.title || !newNotice.content) {
       console.log("Validation failed: title or content missing");
+      setStatusMessage({ type: 'error', text: 'कृपया सूचनाको शीर्षक र विवरण अनिवार्य भर्नुहोस्।' });
       return;
     }
     
@@ -185,8 +256,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     console.log("Attempting to add notice to Firestore:", item);
     try {
       console.log("Adding doc to collection 'notices' in db:", db);
-      const docRef = await addDoc(collection(db, 'notices'), item);
-      console.log("Notice added with ID: ", docRef.id);
+      try {
+        const docRef = await addDoc(collection(db, 'notices'), item);
+        console.log("Notice added with ID: ", docRef.id);
+      } catch (err) {
+        throw handleFirestoreError(err, OperationType.CREATE, 'notices');
+      }
       await refetchData();
       setStatusMessage({ type: 'success', text: 'सूचना सफलतापूर्वक सुरक्षित गरियो!' });
       setTimeout(() => {
@@ -196,10 +271,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       }, 1500);
     } catch (error) {
       console.error("Error adding notice to Firestore:", error);
-      if (error instanceof Error) {
-        console.error("Error message:", error.message);
-      }
-      setStatusMessage({ type: 'error', text: `सूचना सुरक्षित गर्दा त्रुटि भयो: ${error instanceof Error ? error.message : 'Unknown error'}` });
+      setStatusMessage({ type: 'error', text: `सूचना सुरक्षित गर्दा त्रुटि भयो।` });
       setIsSaving(false);
     }
   };
@@ -209,7 +281,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     console.log("handleAddDownload called", newDownload);
     if (!newDownload.title || !newDownload.fileUrl) {
       console.log("Validation failed: title or fileUrl missing");
-      alert('कृपया फाइलको शीर्षक र फाइल दुबै छान्नुहोस्।');
+      setStatusMessage({ type: 'error', text: 'कृपया फाइलको शीर्षक र फाइल अनिवार्य छान्नुहोस्।' });
       return;
     }
     
@@ -224,8 +296,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     };
     console.log("Attempting to add download to Firestore:", item);
     try {
-      const docRef = await addDoc(collection(db, 'downloads'), item);
-      console.log("Download added with ID: ", docRef.id);
+      try {
+        const docRef = await addDoc(collection(db, 'downloads'), item);
+        console.log("Download added with ID: ", docRef.id);
+      } catch (err) {
+        throw handleFirestoreError(err, OperationType.CREATE, 'downloads');
+      }
       await refetchData();
       setStatusMessage({ type: 'success', text: 'डाउनलोड फाइल सफलतापूर्वक सुरक्षित गरियो!' });
       setTimeout(() => {
@@ -242,7 +318,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleDeleteDownload = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'downloads', id));
+      try {
+        await deleteDoc(doc(db, 'downloads', id));
+      } catch (err) {
+        throw handleFirestoreError(err, OperationType.DELETE, `downloads/${id}`);
+      }
       await refetchData();
     } catch (error) {
       console.error("Error deleting download: ", error);
@@ -251,7 +331,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleDeleteNotice = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'notices', id));
+      try {
+        await deleteDoc(doc(db, 'notices', id));
+      } catch (err) {
+        throw handleFirestoreError(err, OperationType.DELETE, `notices/${id}`);
+      }
       await refetchData();
     } catch (error) {
       console.error("Error deleting notice: ", error);
@@ -277,8 +361,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     };
     console.log("Attempting to add service to Firestore:", item);
     try {
-      const docRef = await addDoc(collection(db, 'services'), item);
-      console.log("Service added with ID: ", docRef.id);
+      try {
+        const docRef = await addDoc(collection(db, 'services'), item);
+        console.log("Service added with ID: ", docRef.id);
+      } catch (err) {
+        throw handleFirestoreError(err, OperationType.CREATE, 'services');
+      }
       await refetchData();
       setStatusMessage({ type: 'success', text: 'सेवा सफलतापूर्वक सुरक्षित गरियो!' });
       setTimeout(() => {
@@ -295,7 +383,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleDeleteService = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'services', id));
+      try {
+        await deleteDoc(doc(db, 'services', id));
+      } catch (err) {
+        throw handleFirestoreError(err, OperationType.DELETE, `services/${id}`);
+      }
       await refetchData();
     } catch (error) {
       console.error("Error deleting service: ", error);
@@ -322,6 +414,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     console.log("handleAddDoctor called", newDoctor);
     if (!newDoctor.name || !newDoctor.specialization) {
       console.log("Validation failed: name or specialization missing");
+      setStatusMessage({ type: 'error', text: 'कृपया कर्मचारीको नाम र पद अनिवार्य भर्नुहोस्।' });
       return;
     }
     
@@ -332,16 +425,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       if (editingDoctorId) {
         console.log("Attempting to update doctor in Firestore:", editingDoctorId, newDoctor);
         const docRef = doc(db, 'doctors', editingDoctorId);
-        await updateDoc(docRef, {
-          name: newDoctor.name,
-          specialization: newDoctor.specialization,
-          level: newDoctor.level,
-          department: newDoctor.department,
-          availability: newDoctor.availability,
-          image: newDoctor.image,
-          category: newDoctor.category as any,
-          featuredRole: (newDoctor.featuredRole as any) || undefined
-        });
+        try {
+          await updateDoc(docRef, {
+            name: newDoctor.name,
+            specialization: newDoctor.specialization,
+            level: newDoctor.level,
+            department: newDoctor.department,
+            availability: newDoctor.availability,
+            image: newDoctor.image,
+            category: newDoctor.category as any,
+            featuredRole: (newDoctor.featuredRole as any) || undefined
+          });
+        } catch (err) {
+          throw handleFirestoreError(err, OperationType.UPDATE, `doctors/${editingDoctorId}`);
+        }
         console.log("Doctor updated");
         updateDoctors(doctors.map(d => d.id === editingDoctorId ? { ...d, ...newDoctor } : d));
         setStatusMessage({ type: 'success', text: 'कर्मचारी सफलतापूर्वक अपडेट गरियो!' });
@@ -357,8 +454,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           category: newDoctor.category as any,
           featuredRole: (newDoctor.featuredRole as any) || undefined
         };
-        const docRef = await addDoc(collection(db, 'doctors'), item);
-        console.log("Doctor added with ID: ", docRef.id);
+        try {
+          const docRef = await addDoc(collection(db, 'doctors'), item);
+          console.log("Doctor added with ID: ", docRef.id);
+        } catch (err) {
+          throw handleFirestoreError(err, OperationType.CREATE, 'doctors');
+        }
         await refetchData();
         setStatusMessage({ type: 'success', text: 'कर्मचारी सफलतापूर्वक थपियो!' });
       }
@@ -380,7 +481,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleDeleteDoctor = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'doctors', id));
+      try {
+        await deleteDoc(doc(db, 'doctors', id));
+      } catch (err) {
+        throw handleFirestoreError(err, OperationType.DELETE, `doctors/${id}`);
+      }
       await refetchData();
     } catch (error) {
       console.error("Error deleting doctor: ", error);
