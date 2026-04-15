@@ -20,7 +20,21 @@ const Notices: React.FC<NoticesProps> = ({ notices, noticeId }) => {
     }
   }, [noticeId, notices]);
 
-  const closeModal = () => setSelectedNotice(null);
+  const closeModal = () => {
+    setSelectedNotice(null);
+    const params = new URLSearchParams(window.location.search);
+    params.delete('id');
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+  };
+
+  const openNotice = (notice: Notice) => {
+    setSelectedNotice(notice);
+    const params = new URLSearchParams(window.location.search);
+    params.set('id', notice.id);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-8 py-16 relative">
@@ -60,12 +74,17 @@ const Notices: React.FC<NoticesProps> = ({ notices, noticeId }) => {
                   </a>
                 )}
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-blue-700 transition-colors">{notice.title}</h3>
+              <h4 
+                    className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-blue-700 transition-colors cursor-pointer"
+                    onClick={() => openNotice(notice)}
+                  >
+                    {notice.title}
+                  </h4>
               <p className="text-slate-600 leading-relaxed mb-6 line-clamp-3">{notice.content}</p>
               
               <div className="flex items-center gap-4">
                 <button 
-                  onClick={() => setSelectedNotice(notice)}
+                  onClick={() => openNotice(notice)}
                   className="bg-slate-50 hover:bg-slate-100 text-slate-900 px-5 py-2.5 rounded-xl text-sm font-bold inline-flex items-center gap-2 transition-colors border border-slate-200"
                 >
                   विस्तृत जानकारी <ChevronRight size={16} />
