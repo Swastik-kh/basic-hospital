@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
 import { Service, Appointment } from '../types';
-import { X, Send, Phone, User, Calendar, MapPin, Info, CheckCircle2 } from 'lucide-react';
+import { X, Send, Phone, User, Calendar, MapPin, Info, CheckCircle2, QrCode, Download } from 'lucide-react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { NepaliDatePicker } from './NepaliDatePicker';
+import { QRCodeSVG } from 'qrcode.react';
 // @ts-ignore
 import NepaliDate from 'nepali-date-converter';
 
@@ -75,20 +76,70 @@ const OnlineRegistrationForm: React.FC<OnlineRegistrationFormProps> = ({ service
   };
 
   if (isSuccess) {
+    const qrData = JSON.stringify({
+      regNo: regNumber,
+      name: formData.patientName,
+      service: services.find(s => s.id === formData.serviceId)?.name,
+      date: formData.date
+    });
+
+    const downloadQR = () => {
+      const svg = document.getElementById('registration-qr');
+      if (svg) {
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx?.drawImage(img, 0, 0);
+          const pngFile = canvas.toDataURL('image/png');
+          const downloadLink = document.createElement('a');
+          downloadLink.download = `QR-${regNumber}.png`;
+          downloadLink.href = pngFile;
+          downloadLink.click();
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+      }
+    };
+
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div className="bg-white w-full max-w-md rounded-3xl p-8 text-center shadow-2xl animate-in zoom-in-95 duration-200">
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 size={48} />
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+        <div className="bg-white w-full max-w-md rounded-3xl p-8 text-center shadow-2xl animate-in zoom-in-95 duration-200 my-8">
+          <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 size={32} />
           </div>
           <h3 className="text-2xl font-black text-slate-900 mb-2">दर्ता सफल भयो!</h3>
-          <div className="bg-blue-50 p-4 rounded-2xl mb-6 border border-blue-100">
-            <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-1">तपाईंको दर्ता नम्बर (Registration No.)</p>
-            <p className="text-3xl font-black text-blue-900 tracking-tight">{regNumber}</p>
+          
+          <div className="bg-blue-50 p-6 rounded-2xl mb-6 border border-blue-100">
+            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-3">तपाईंको दर्ता विवरण (Registration Details)</p>
+            
+            <div className="bg-white p-4 rounded-xl shadow-sm mb-4 flex justify-center">
+              <QRCodeSVG 
+                id="registration-qr"
+                value={qrData} 
+                size={150}
+                level="H"
+                includeMargin={true}
+              />
+            </div>
+
+            <p className="text-xs font-bold text-slate-500 mb-1">दर्ता नम्बर:</p>
+            <p className="text-2xl font-black text-blue-900 tracking-tight mb-4">{regNumber}</p>
+            
+            <button 
+              onClick={downloadQR}
+              className="flex items-center gap-2 mx-auto text-blue-700 font-bold text-xs hover:underline"
+            >
+              <Download size={14} /> QR कोड डाउनलोड गर्नुहोस्
+            </button>
           </div>
-          <p className="text-slate-600 font-medium mb-6">
-            तपाईंको अनलाइन दर्ता सफलतापूर्वक प्राप्त भएको छ। कृपया यो दर्ता नम्बर सुरक्षित राख्नुहोला। अस्पतालबाट तपाईंलाई चाँडै सम्पर्क गरिनेछ।
+
+          <p className="text-slate-600 text-sm font-medium mb-6 leading-relaxed">
+            तपाईंको अनलाइन दर्ता सफलतापूर्वक प्राप्त भएको छ। कृपया यो **QR कोड** वा **दर्ता नम्बर** अस्पतालको काउन्टरमा देखाउनुहोला।
           </p>
+          
           <button 
             onClick={onClose}
             className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition-colors"

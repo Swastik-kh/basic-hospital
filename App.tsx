@@ -340,26 +340,31 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans overflow-x-hidden">
-      {view !== 'ADMIN_DASHBOARD' && <Navbar currentView={view} setView={setView} setNoticeId={setNoticeId} isAdmin={isAdmin} />}
       {view !== 'ADMIN_DASHBOARD' && (
-        <div className="bg-blue-900 text-white py-2 overflow-hidden border-b border-blue-800">
-          <div className="flex animate-marquee whitespace-nowrap">
-            {notices.filter(n => n.isMarquee).map((notice) => (
-              <div 
-                key={notice.id} 
-                className="flex items-center gap-4 px-8 cursor-pointer hover:text-blue-200 transition-colors" 
-                onClick={() => {
-                  setNoticeId(notice.id);
-                  setView('NOTICES');
-                }}
-              >
-                <span className="font-black text-xs uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded">सूचना</span>
-                <span className="text-sm font-medium">{notice.title}</span>
-              </div>
-            ))}
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <Navbar currentView={view} setView={setView} setNoticeId={setNoticeId} isAdmin={isAdmin} />
+          <div className="bg-blue-900 text-white py-2 overflow-hidden border-b border-blue-800">
+            <div className="flex animate-marquee whitespace-nowrap">
+              {notices.filter(n => n.isMarquee).map((notice) => (
+                <div 
+                  key={notice.id} 
+                  className="flex items-center gap-4 px-8 cursor-pointer hover:text-blue-200 transition-colors" 
+                  onClick={() => {
+                    setNoticeId(notice.id);
+                    setView('NOTICES');
+                  }}
+                >
+                  <span className="font-black text-xs uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded">सूचना</span>
+                  <span className="text-sm font-medium">{notice.title}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
+      
+      {view !== 'ADMIN_DASHBOARD' && <div className="h-[172px]" />}
+
       <main className="flex-1">{renderContent()}</main>
       {view !== 'ADMIN_DASHBOARD' && <Footer settings={settings} />}
     </div>

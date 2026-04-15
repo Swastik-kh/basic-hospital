@@ -588,7 +588,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           contactNumber: newDoctor.contactNumber || '',
           image: newDoctor.image || 'https://picsum.photos/seed/doc/400/400',
           category: newDoctor.category as any,
-          featuredRole: newDoctor.featuredRole || null,
+          featuredRole: (newDoctor.featuredRole as any) || null,
           order: doctors.length
         };
         try {
@@ -638,9 +638,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setStatusMessage(null);
     setNewDoctor({ 
       name: '', specialization: '', level: '', department: '', 
-      availability: '', contactNumber: '', image: '', category: 'STAFF', featuredRole: '' 
+      availability: '', contactNumber: '', image: '', category: 'STAFF', featuredRole: undefined 
     });
-    setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
+    setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '', isMarquee: false });
     setNewService({ name: '', description: '', icon: 'Stethoscope' });
   };
 

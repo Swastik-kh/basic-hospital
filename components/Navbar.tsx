@@ -16,7 +16,16 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, setNoticeId, isAd
   const [isOpen, setIsOpen] = useState(false);
   const [staffDropdownOpen, setStaffDropdownOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -73,9 +82,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, setNoticeId, isAd
   const isStaffViewActive = ['COMMITTEE', 'CHIEFS', 'CURRENT_STAFF', 'FORMER_STAFF'].includes(currentView);
 
   return (
-    <header className="w-full flex flex-col z-50 sticky top-0 bg-white">
+    <header className="w-full flex flex-col">
       {/* Official Blue Header Bar */}
-      <div className="bg-[#1e3a8a] text-white py-3 px-8 border-b border-white/10 shadow-md">
+      <div className={`bg-[#1e3a8a] text-white px-8 border-b border-white/10 shadow-md transition-all duration-500 ease-in-out overflow-hidden ${isScrolled ? 'max-h-0 opacity-0 border-none' : 'max-h-40 py-3 opacity-100'}`}>
         <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
           {/* Logo and Name */}
           <div className="flex items-center gap-4 cursor-pointer group" onClick={() => { setView('HOME'); setNoticeId(null); }}>
@@ -118,6 +127,15 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, setNoticeId, isAd
       <nav className="bg-white text-slate-800 shadow-xl border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-8 flex items-center justify-between h-14">
           <div className="flex items-center space-x-1 h-full">
+            {isScrolled && (
+              <div className="flex items-center gap-3 mr-6 cursor-pointer animate-in fade-in slide-in-from-left-4 duration-300" onClick={() => { setView('HOME'); setNoticeId(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem" className="h-10 w-auto" />
+                <div className="flex flex-col">
+                  <h1 className="text-sm font-black leading-tight text-blue-900">आधारभूत नगर अस्पताल</h1>
+                  <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">बेल्टार, उदयपुर</span>
+                </div>
+              </div>
+            )}
             <button onClick={() => { setView('HOME'); setNoticeId(null); }} className={`px-4 h-full text-sm font-black border-b-4 transition-all ${currentView === 'HOME' ? 'border-blue-700 bg-blue-50 text-blue-700 shadow-inner' : 'border-transparent hover:bg-slate-50'}`}>गृहपृष्ठ</button>
             
             {navItems.map((item) => (
