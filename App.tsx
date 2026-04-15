@@ -23,17 +23,19 @@ const App: React.FC = () => {
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
 
   useEffect(() => {
+    // Force logout on initial load so admin always has to enter password
+    signOut(auth).catch(err => console.error("Initial logout error:", err));
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAdmin(true);
-        if (view === 'ADMIN_LOGIN') setView('ADMIN_DASHBOARD');
       } else {
         setIsAdmin(false);
         if (view === 'ADMIN_DASHBOARD') setView('HOME');
       }
     });
     return () => unsubscribe();
-  }, [view]);
+  }, []);
 
   useEffect(() => {
     const collections = [
