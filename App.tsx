@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewState, Notice, Service, Doctor, DownloadItem } from './types';
 import { INITIAL_NOTICES, INITIAL_SERVICES, INITIAL_DOCTORS, INITIAL_DOWNLOADS } from './constants';
 import Navbar from './components/Navbar';
@@ -10,6 +10,8 @@ import Notices from './pages/Notices';
 import Downloads from './pages/Downloads';
 import AdminDashboard from './pages/AdminDashboard';
 import { LogIn as LogInIcon, ShieldCheck as ShieldIcon, AlertCircle as AlertIcon, Users, MapPin, Layers, Briefcase } from 'lucide-react';
+import { db } from './services/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('HOME');
@@ -18,6 +20,24 @@ const App: React.FC = () => {
   const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
   const [doctors, setDoctors] = useState<Doctor[]>(INITIAL_DOCTORS);
   const [downloads, setDownloads] = useState<DownloadItem[]>(INITIAL_DOWNLOADS);
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'notices'));
+        const fetchedNotices: Notice[] = [];
+        querySnapshot.forEach((doc) => {
+          fetchedNotices.push({ id: doc.id, ...doc.data() } as Notice);
+        });
+        if (fetchedNotices.length > 0) {
+          setNotices(fetchedNotices);
+        }
+      } catch (error) {
+        console.error("Error fetching notices: ", error);
+      }
+    };
+    fetchNotices();
+  }, []);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

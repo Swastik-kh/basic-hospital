@@ -3,6 +3,8 @@ import React, { useState, useRef } from 'react';
 import { Notice, Service, Doctor, DownloadItem } from '../types';
 import { Plus, Trash2, Pencil, LayoutDashboard, FileText, Users, LogOut, X, UploadCloud, Download, Menu, Briefcase, Layers, UserCircle, Star, FileCheck, AlertCircle, GripVertical, Info, Image as ImageIcon } from 'lucide-react';
 import { NepaliDatePicker } from '../components/NepaliDatePicker';
+import { db } from '../services/firebase';
+import { collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
 interface AdminDashboardProps {
   notices: Notice[];
@@ -110,20 +112,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     updateDoctors(newList);
   };
 
-  const handleAddNotice = () => {
+  const handleAddNotice = async () => {
     if (!newNotice.title || !newNotice.content) return;
-    const item: Notice = {
-      id: Math.random().toString(36).substr(2, 9),
+    const item: Omit<Notice, 'id'> = {
       title: newNotice.title,
       content: newNotice.content,
-      // Use selected date or fallback to today
       date: newNotice.date || new Date().toLocaleDateString('ne-NP').replace(/\//g, '-'),
       category: newNotice.category as any,
       pdfUrl: newNotice.pdfUrl.trim() || undefined
     };
-    updateNotices([item, ...notices]);
-    setIsAdding(false);
-    setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
+    try {
+      const docRef = await addDoc(collection(db, 'notices'), item);
+      updateNotices([{ id: docRef.id, ...item }, ...notices]);
+      setIsAdding(false);
+      setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
+    } catch (error) {
+      console.error("Error adding notice: ", error);
+    }
   };
 
   const handleAddDownload = () => {
@@ -149,9 +154,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const handleDeleteNotice = (id: string) => {
+  const handleDeleteNotice = async (id: string) => {
     if(confirm('के तपाईं यो सूचना हटाउन चाहनुहुन्छ?')) {
-      updateNotices(notices.filter(n => n.id !== id));
+      try {
+        await deleteDoc(doc(db, 'notices', id));
+        updateNotices(notices.filter(n => n.id !== id));
+      } catch (error) {
+        console.error("Error deleting notice: ", error);
+      }
     }
   };
 
