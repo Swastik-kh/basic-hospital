@@ -1,10 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Notice, Service, Doctor, DownloadItem, Appointment } from '../types';
-import { Plus, Trash2, Pencil, LayoutDashboard, FileText, Users, LogOut, X, UploadCloud, Download, Menu, Briefcase, Layers, UserCircle, Star, FileCheck, AlertCircle, GripVertical, Info, Image as ImageIcon, CalendarCheck, Phone, ShieldCheck } from 'lucide-react';
+import { Notice, Service, Doctor, DownloadItem, Appointment, HospitalSettings } from '../types';
+import { Plus, Trash2, Pencil, LayoutDashboard, FileText, Users, LogOut, X, UploadCloud, Download, Menu, Briefcase, Layers, UserCircle, Star, FileCheck, AlertCircle, GripVertical, Info, Image as ImageIcon, CalendarCheck, Phone, ShieldCheck, Settings } from 'lucide-react';
 import { NepaliDatePicker } from '../components/NepaliDatePicker';
 import { db } from '../services/firebase';
-import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs, setDoc } from 'firebase/firestore';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { auth } from '../services/firebase';
 
@@ -65,6 +65,7 @@ interface AdminDashboardProps {
   doctors: Doctor[];
   downloads: DownloadItem[];
   appointments: Appointment[];
+  settings: HospitalSettings | null;
   onLogout: () => void;
   updateNotices: (n: Notice[]) => void;
   updateServices: (s: Service[]) => void;
@@ -79,6 +80,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   doctors, 
   downloads,
   appointments,
+  settings,
   onLogout, 
   updateNotices,
   updateServices,
@@ -86,16 +88,43 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   updateDownloads,
   updateAppointments
 }) => {
-  const [activeTab, setActiveTab] = useState<'notices' | 'services' | 'doctors' | 'downloads' | 'appointments' | 'password'>('notices');
+  const [activeTab, setActiveTab] = useState<'notices' | 'services' | 'doctors' | 'downloads' | 'appointments' | 'settings' | 'password'>('notices');
   const [isAdding, setIsAdding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
+  const [tempSettings, setTempSettings] = useState<HospitalSettings>({
+    ambulanceContact: '',
+    inquiryContact: '',
+    officeContact: ''
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setTempSettings(settings);
+    }
+  }, [settings]);
 
   useEffect(() => {
     setStatusMessage(null);
   }, [activeTab]);
+
+  const handleUpdateSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setStatusMessage(null);
+    try {
+      const docRef = doc(db, 'settings', 'hospital');
+      await setDoc(docRef, tempSettings, { merge: true });
+      setStatusMessage({ type: 'success', text: 'सम्पर्क विवरण सफलतापूर्वक अपडेट गरियो!' });
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      setStatusMessage({ type: 'error', text: 'विवरण अपडेट गर्दा त्रुटि भयो।' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -620,6 +649,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: 'doctors', label: 'कर्मचारी', icon: Users },
     { id: 'downloads', label: 'डाउनलोड', icon: Download },
     { id: 'appointments', label: 'अनलाइन दर्ता', icon: CalendarCheck },
+    { id: 'settings', label: 'सम्पर्क विवरण', icon: Settings },
     { id: 'password', label: 'पासवर्ड', icon: UserCircle },
   ];
 
@@ -1207,6 +1237,63 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </td>
                     </tr>
                   ))}
+
+                  {activeTab === 'settings' && (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8">
+                        <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+                          <h3 className="text-lg font-bold text-slate-900 mb-4">सम्पर्क विवरण सेटअप</h3>
+                          {statusMessage && (
+                            <div className={`p-4 mb-4 rounded-xl text-sm font-bold ${statusMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {statusMessage.text}
+                            </div>
+                          )}
+                          <form onSubmit={handleUpdateSettings} className="space-y-4">
+                            <div>
+                              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">एम्बुलेन्स सम्पर्क नम्बर</label>
+                              <input
+                                type="text"
+                                value={tempSettings.ambulanceContact}
+                                onChange={(e) => setTempSettings({...tempSettings, ambulanceContact: e.target.value})}
+                                className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="१०२ / ९८XXXXXXXX"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">सोधपुछ सम्पर्क नम्बर</label>
+                              <input
+                                type="text"
+                                value={tempSettings.inquiryContact}
+                                onChange={(e) => setTempSettings({...tempSettings, inquiryContact: e.target.value})}
+                                className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="०३५-४४XXXX"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">कार्यालय सम्पर्क नम्बर</label>
+                              <input
+                                type="text"
+                                value={tempSettings.officeContact}
+                                onChange={(e) => setTempSettings({...tempSettings, officeContact: e.target.value})}
+                                className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="+९७७-०३५-XXXXXX"
+                                required
+                              />
+                            </div>
+                            <button 
+                              type="submit" 
+                              disabled={isSaving}
+                              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                            >
+                              {isSaving ? 'सुरक्षित गर्दै...' : 'विवरण सुरक्षित गर्नुहोस्'}
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
 
                   {activeTab === 'password' && (
                     <tr>

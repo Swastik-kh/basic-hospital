@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ViewState, Notice, Service, Doctor, DownloadItem, Appointment } from './types';
+import { ViewState, Notice, Service, Doctor, DownloadItem, Appointment, HospitalSettings } from './types';
 import { INITIAL_NOTICES, INITIAL_SERVICES, INITIAL_DOCTORS, INITIAL_DOWNLOADS } from './constants';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -11,7 +11,7 @@ import Downloads from './pages/Downloads';
 import AdminDashboard from './pages/AdminDashboard';
 import { LogIn as LogInIcon, ShieldCheck as ShieldIcon, AlertCircle as AlertIcon, Users, MapPin, Layers, Briefcase } from 'lucide-react';
 import { db, auth } from './services/firebase';
-import { collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot, doc } from 'firebase/firestore';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 
 const App: React.FC = () => {
@@ -23,6 +23,7 @@ const App: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [settings, setSettings] = useState<HospitalSettings | null>(null);
 
   useEffect(() => {
     // Force logout on initial load so admin always has to enter password
@@ -83,7 +84,24 @@ const App: React.FC = () => {
       });
     });
 
-    return () => unsubscribers.forEach(unsub => unsub());
+    // Fetch settings
+    const settingsUnsub = onSnapshot(doc(db, 'settings', 'hospital'), (snapshot) => {
+      if (snapshot.exists()) {
+        setSettings(snapshot.data() as HospitalSettings);
+      } else {
+        // Default settings if none exist
+        setSettings({
+          ambulanceContact: '१०२ / ९८४२०XXXXX',
+          inquiryContact: '०३५-४४XXXX',
+          officeContact: '+९७७-०३५-XXXXXX'
+        });
+      }
+    });
+
+    return () => {
+      unsubscribers.forEach(unsub => unsub());
+      settingsUnsub();
+    };
   }, []);
 
   const [username, setUsername] = useState('');
@@ -190,7 +208,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (view) {
       case 'HOME':
-        return <Home notices={notices} services={services} doctors={doctors} setView={setView} setNoticeId={setNoticeId} />;
+        return <Home notices={notices} services={services} doctors={doctors} settings={settings} setView={setView} setNoticeId={setNoticeId} />;
       case 'NOTICES':
         return <Notices notices={notices} noticeId={noticeId || undefined} />;
       case 'SERVICES':
@@ -267,7 +285,7 @@ const App: React.FC = () => {
           </div>
         );
       case 'ADMIN_DASHBOARD':
-        return isAdmin ? <AdminDashboard notices={notices} services={services} doctors={doctors} downloads={downloads} appointments={appointments} onLogout={handleLogout} updateNotices={setNotices} updateServices={setServices} updateDoctors={setDoctors} updateDownloads={setDownloads} updateAppointments={setAppointments} /> : (
+        return isAdmin ? <AdminDashboard notices={notices} services={services} doctors={doctors} downloads={downloads} appointments={appointments} settings={settings} onLogout={handleLogout} updateNotices={setNotices} updateServices={setServices} updateDoctors={setDoctors} updateDownloads={setDownloads} updateAppointments={setAppointments} /> : (
           <div className="max-w-md mx-auto py-16 md:py-24 px-4">
             <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
               <div className="bg-blue-800 p-6 md:p-8 text-center text-white">
@@ -315,7 +333,7 @@ const App: React.FC = () => {
           </div>
         );
       default:
-        return <Home notices={notices} services={services} doctors={doctors} setView={setView} setNoticeId={setNoticeId} />;
+        return <Home notices={notices} services={services} doctors={doctors} settings={settings} setView={setView} setNoticeId={setNoticeId} />;
     }
   };
 
@@ -342,7 +360,7 @@ const App: React.FC = () => {
         </div>
       )}
       <main className="flex-1">{renderContent()}</main>
-      {view !== 'ADMIN_DASHBOARD' && <Footer />}
+      {view !== 'ADMIN_DASHBOARD' && <Footer settings={settings} />}
     </div>
   );
 };

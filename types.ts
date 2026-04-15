@@ -71,3 +71,9 @@ export interface Appointment {
   status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
   createdAt: string;
 }
+
+export interface HospitalSettings {
+  ambulanceContact: string;
+  inquiryContact: string;
+  officeContact: string;
+}

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Notice, Service, Doctor } from '../types';
+import { Notice, Service, Doctor, HospitalSettings } from '../types';
 import { ArrowRight, MessageCircle, Send, Loader2, Info, ChevronLeft, ChevronRight, FileDown, UserCircle, MapPin } from 'lucide-react';
 import { getHealthAdvice } from '../services/geminiService';
 
@@ -8,11 +8,12 @@ interface HomeProps {
   notices: Notice[];
   services: Service[];
   doctors: Doctor[];
+  settings: HospitalSettings | null;
   setView: (view: any) => void;
   setNoticeId: (id: string | null) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView, setNoticeId }) => {
+const Home: React.FC<HomeProps> = ({ notices, services, doctors, settings, setView, setNoticeId }) => {
   const [aiQuery, setAiQuery] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [loading, setLoading] = useState(false);
@@ -237,11 +238,11 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView, setNot
             <div className="space-y-4 md:space-y-6 relative">
               <div className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-blue-400/50 transition-all cursor-default">
                 <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-blue-400 mb-1 block">२४/७ एम्बुलेन्स</span>
-                <span className="text-2xl md:text-3xl font-black block tracking-tighter">१०२ / ९८४२०XXXXX</span>
+                <span className="text-2xl md:text-3xl font-black block tracking-tighter">{settings?.ambulanceContact || '१०२ / ९८४२०XXXXX'}</span>
               </div>
               <div className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-blue-400/50 transition-all cursor-default">
                 <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-blue-400 mb-1 block">सोधपुछ कक्ष</span>
-                <span className="text-xl md:text-2xl font-black block tracking-tighter">०३५-४४XXXX</span>
+                <span className="text-xl md:text-2xl font-black block tracking-tighter">{settings?.inquiryContact || '०३५-४४XXXX'}</span>
               </div>
             </div>
             <button className="w-full mt-6 md:mt-8 bg-blue-600 hover:bg-blue-700 py-3 md:py-4 rounded-xl font-black text-sm transition-all shadow-lg active:scale-95">

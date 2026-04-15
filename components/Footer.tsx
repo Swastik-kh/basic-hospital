@@ -1,8 +1,13 @@
 
 import React from 'react';
 import { Phone, Mail, MapPin, ExternalLink } from 'lucide-react';
+import { HospitalSettings } from '../types';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  settings: HospitalSettings | null;
+}
+
+const Footer: React.FC<FooterProps> = ({ settings }) => {
   return (
     <footer className="bg-slate-900 text-white pt-12 pb-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,7 +21,7 @@ const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="text-blue-400" size={20} />
-                <p>+९७७-०३५-XXXXXX</p>
+                <p>{settings?.officeContact || '+९७७-०३५-XXXXXX'}</p>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="text-blue-400" size={20} />
@@ -75,7 +80,7 @@ const Footer: React.FC = () => {
             <h3 className="text-xl font-bold mb-4">आपतकालीन सेवा</h3>
             <div className="bg-red-900/40 p-4 rounded-lg border border-red-500/50">
               <p className="text-sm opacity-80 mb-2 font-medium">एम्बुलेन्स सेवा (बेल्टार)</p>
-              <p className="text-2xl font-black text-red-500">१०२ / ९८XXXXXXXX</p>
+              <p className="text-2xl font-black text-red-500">{settings?.ambulanceContact || '१०२ / ९८XXXXXXXX'}</p>
               <p className="text-xs mt-2 italic">* २४ सै घण्टा, ७ सै दिन सेवा उपलब्ध छ।</p>
             </div>
           </div>
