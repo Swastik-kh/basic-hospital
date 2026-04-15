@@ -906,6 +906,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <td colSpan={4} className="px-6 py-8">
                         <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-sm border border-slate-200">
                           <h3 className="text-lg font-bold text-slate-900 mb-4">पासवर्ड परिवर्तन गर्नुहोस्</h3>
+                          {statusMessage && (
+                            <div className={`p-4 mb-4 rounded-xl text-sm font-bold ${statusMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {statusMessage.text}
+                            </div>
+                          )}
                           <form onSubmit={handlePasswordChange} className="space-y-4">
                             <input
                               type="password"
@@ -936,32 +941,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Password Change Form */}
-      <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-sm border border-slate-200">
-        <h3 className="text-lg font-bold text-slate-900 mb-4">पासवर्ड परिवर्तन गर्नुहोस्</h3>
-        <form onSubmit={handlePasswordChange} className="space-y-4">
-          <input
-            type="password"
-            placeholder="पुरानो पासवर्ड"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="password"
-            placeholder="नयाँ पासवर्ड"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="block w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">
-            पासवर्ड परिवर्तन गर्नुहोस्
-          </button>
-        </form>
       </div>
       
       {sidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden" />}
