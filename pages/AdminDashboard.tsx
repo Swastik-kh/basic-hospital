@@ -267,8 +267,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setTimeout(() => {
         setIsAdding(false);
         setIsSaving(false);
+        setStatusMessage(null);
         setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
-      }, 1500);
+      }, 2500);
     } catch (error) {
       console.error("Error adding notice to Firestore:", error);
       setStatusMessage({ type: 'error', text: `सूचना सुरक्षित गर्दा त्रुटि भयो।` });
@@ -307,8 +308,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setTimeout(() => {
         setIsAdding(false);
         setIsSaving(false);
+        setStatusMessage(null);
         setNewDownload({ title: '', category: 'Form', fileUrl: '', fileName: '', date: '' });
-      }, 1500);
+      }, 2500);
     } catch (error) {
       console.error("Error adding download: ", error);
       setStatusMessage({ type: 'error', text: 'डाउनलोड फाइल सुरक्षित गर्दा त्रुटि भयो।' });
@@ -372,8 +374,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setTimeout(() => {
         setIsAdding(false);
         setIsSaving(false);
+        setStatusMessage(null);
         setNewService({ name: '', description: '', icon: 'Stethoscope' });
-      }, 1500);
+      }, 2500);
     } catch (error) {
       console.error("Error adding service: ", error);
       setStatusMessage({ type: 'error', text: 'सेवा सुरक्षित गर्दा त्रुटि भयो।' });
@@ -396,6 +399,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleEditDoctor = (doc: Doctor) => {
     setEditingDoctorId(doc.id);
+    setStatusMessage(null);
     setNewDoctor({
       name: doc.name,
       specialization: doc.specialization,
@@ -467,11 +471,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         setIsAdding(false);
         setIsSaving(false);
         setEditingDoctorId(null);
+        setStatusMessage(null);
         setNewDoctor({ 
           name: '', specialization: '', level: '', department: '', 
           availability: '', image: '', category: 'STAFF', featuredRole: '' 
         });
-      }, 1500);
+      }, 2500);
     } catch (error) {
       console.error("Error adding/updating doctor: ", error);
       setStatusMessage({ type: 'error', text: 'कर्मचारी सुरक्षित गर्दा त्रुटि भयो।' });
@@ -495,6 +500,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const closeForm = () => {
     setIsAdding(false);
     setEditingDoctorId(null);
+    setStatusMessage(null);
     setNewDoctor({ 
       name: '', specialization: '', level: '', department: '', 
       availability: '', image: '', category: 'STAFF', featuredRole: '' 
