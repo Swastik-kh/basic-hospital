@@ -474,12 +474,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             availability: newDoctor.availability,
             image: newDoctor.image,
             category: newDoctor.category as any,
-            featuredRole: (newDoctor.featuredRole as any) || undefined
+            featuredRole: newDoctor.featuredRole || null
           });
         } catch (err) {
+          console.error("Firestore update error:", err);
           throw handleFirestoreError(err, OperationType.UPDATE, `doctors/${editingDoctorId}`);
         }
-        console.log("Doctor updated");
+        console.log("Doctor updated successfully");
         await refetchData();
         setStatusMessage({ type: 'success', text: 'कर्मचारी सफलतापूर्वक अपडेट गरियो!' });
       } else {
@@ -492,12 +493,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           availability: newDoctor.availability || 'संपर्क गर्नुहोस्',
           image: newDoctor.image || 'https://picsum.photos/seed/doc/400/400',
           category: newDoctor.category as any,
-          featuredRole: (newDoctor.featuredRole as any) || undefined
+          featuredRole: newDoctor.featuredRole || null
         };
         try {
           const docRef = await addDoc(collection(db, 'doctors'), item);
           console.log("Doctor added with ID: ", docRef.id);
         } catch (err) {
+          console.error("Firestore add error:", err);
           throw handleFirestoreError(err, OperationType.CREATE, 'doctors');
         }
         await refetchData();
