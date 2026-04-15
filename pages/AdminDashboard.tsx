@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Notice, Service, Doctor, DownloadItem } from '../types';
 import { Plus, Trash2, Pencil, LayoutDashboard, FileText, Users, LogOut, X, UploadCloud, Download, Menu, Briefcase, Layers, UserCircle, Star, FileCheck, AlertCircle, GripVertical, Info, Image as ImageIcon } from 'lucide-react';
 import { NepaliDatePicker } from '../components/NepaliDatePicker';
@@ -88,6 +88,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
+
+  useEffect(() => {
+    setStatusMessage(null);
+  }, [activeTab]);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -867,7 +871,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {navTabs.map(tab => (
             <button 
               key={tab.id}
-              onClick={() => {setActiveTab(tab.id as any); setIsAdding(false); setSidebarOpen(false); setEditingDoctorId(null);}}
+              onClick={() => {
+                setActiveTab(tab.id as any); 
+                setIsAdding(false); 
+                setSidebarOpen(false); 
+                setEditingDoctorId(null);
+                setStatusMessage(null);
+              }}
               className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800'}`}
             >
               <tab.icon size={18} /> {tab.label} व्यवस्थापन
