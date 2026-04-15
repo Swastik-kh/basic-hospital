@@ -6,6 +6,7 @@ export interface Notice {
   content: string;
   category: 'General' | 'Emergency' | 'Vaccination' | 'Career';
   pdfUrl?: string;
+  isMarquee?: boolean;
 }
 
 export interface TestRate {

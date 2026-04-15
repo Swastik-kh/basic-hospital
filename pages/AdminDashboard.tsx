@@ -146,6 +146,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
   const [editingDoctorId, setEditingDoctorId] = useState<string | null>(null);
+  const [editingNoticeId, setEditingNoticeId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -155,7 +156,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   
   // States for new/editing items
   // Note: We use a temporary placeholder date that will be overwritten by the Nepali Date Picker
-  const [newNotice, setNewNotice] = useState({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
+  const [newNotice, setNewNotice] = useState({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '', isMarquee: false });
   const [newService, setNewService] = useState({ name: '', description: '', icon: 'Stethoscope' });
   const [newDoctor, setNewDoctor] = useState({ 
     name: '', specialization: '', level: '', department: '', 
@@ -258,29 +259,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       content: newNotice.content,
       date: newNotice.date || new Date().toLocaleDateString('ne-NP').replace(/\//g, '-'),
       category: newNotice.category as any,
+      isMarquee: newNotice.isMarquee,
     };
     if (newNotice.pdfUrl.trim()) {
       item.pdfUrl = newNotice.pdfUrl.trim();
     }
-    console.log("Attempting to add notice to Firestore:", item);
+    console.log("Attempting to add/update notice to Firestore:", item);
     try {
-      console.log("Adding doc to collection 'notices' in db:", db);
-      try {
-        const docRef = await addDoc(collection(db, 'notices'), item);
-        console.log("Notice added with ID: ", docRef.id);
-      } catch (err) {
-        throw handleFirestoreError(err, OperationType.CREATE, 'notices');
+      if (editingNoticeId) {
+        const docRef = doc(db, 'notices', editingNoticeId);
+        await updateDoc(docRef, item);
+        setStatusMessage({ type: 'success', text: 'सूचना सफलतापूर्वक अपडेट गरियो!' });
+      } else {
+        await addDoc(collection(db, 'notices'), item);
+        setStatusMessage({ type: 'success', text: 'सूचना सफलतापूर्वक सुरक्षित गरियो!' });
       }
       await refetchData();
-      setStatusMessage({ type: 'success', text: 'सूचना सफलतापूर्वक सुरक्षित गरियो!' });
       setTimeout(() => {
         setIsAdding(false);
         setIsSaving(false);
+        setEditingNoticeId(null);
         setStatusMessage(null);
-        setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
+        setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '', isMarquee: false });
       }, 2500);
     } catch (error) {
-      console.error("Error adding notice to Firestore:", error);
+      console.error("Error adding/updating notice to Firestore:", error);
       setStatusMessage({ type: 'error', text: `सूचना सुरक्षित गर्दा त्रुटि भयो।` });
       setIsSaving(false);
     }
@@ -433,18 +436,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const handleEditDoctor = (doc: Doctor) => {
-    setEditingDoctorId(doc.id);
+  const handleEditNotice = (notice: Notice) => {
+    setEditingNoticeId(notice.id);
     setStatusMessage(null);
-    setNewDoctor({
-      name: doc.name,
-      specialization: doc.specialization,
-      level: doc.level,
-      department: doc.department,
-      availability: doc.availability,
-      image: doc.image,
-      category: doc.category || 'STAFF',
-      featuredRole: doc.featuredRole || ''
+    setNewNotice({
+      title: notice.title,
+      content: notice.content,
+      date: notice.date,
+      category: notice.category,
+      pdfUrl: notice.pdfUrl || '',
+      fileName: '',
+      isMarquee: !!notice.isMarquee
     });
     setIsAdding(true);
   };
@@ -640,6 +642,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </>
                 )}
               </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input 
+                type="checkbox" 
+                id="isMarquee"
+                checked={newNotice.isMarquee}
+                onChange={e => setNewNotice({...newNotice, isMarquee: e.target.checked})}
+                className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="isMarquee" className="text-sm font-bold text-slate-700">सूचनालाई माथि रिबन (Marquee) मा देखाउने</label>
             </div>
 
             <div className="space-y-2">
@@ -1084,6 +1097,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
+                        <button onClick={() => handleEditNotice(notice)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil size={18} /></button>
                         <button onClick={() => handleDeleteNotice(notice.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={18} /></button>
                       </td>
                     </tr>

@@ -322,7 +322,7 @@ const App: React.FC = () => {
       {view !== 'ADMIN_DASHBOARD' && (
         <div className="bg-blue-900 text-white py-2 overflow-hidden border-b border-blue-800">
           <div className="flex animate-marquee whitespace-nowrap">
-            {notices.map((notice) => (
+            {notices.filter(n => n.isMarquee).map((notice) => (
               <div 
                 key={notice.id} 
                 className="flex items-center gap-4 px-8 cursor-pointer hover:text-blue-200 transition-colors" 
