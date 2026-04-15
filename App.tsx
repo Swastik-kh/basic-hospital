@@ -10,8 +10,9 @@ import Notices from './pages/Notices';
 import Downloads from './pages/Downloads';
 import AdminDashboard from './pages/AdminDashboard';
 import { LogIn as LogInIcon, ShieldCheck as ShieldIcon, AlertCircle as AlertIcon, Users, MapPin, Layers, Briefcase } from 'lucide-react';
-import { db } from './services/firebase';
+import { db, auth } from './services/firebase';
 import { collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('HOME');
@@ -20,6 +21,19 @@ const App: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAdmin(true);
+        if (view === 'ADMIN_LOGIN') setView('ADMIN_DASHBOARD');
+      } else {
+        setIsAdmin(false);
+        if (view === 'ADMIN_DASHBOARD') setView('HOME');
+      }
+    });
+    return () => unsubscribe();
+  }, [view]);
 
   useEffect(() => {
     const collections = [
@@ -46,22 +60,27 @@ const App: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'admin') {
-      setIsAdmin(true);
+    setLoginError('');
+    try {
+      await signInWithEmailAndPassword(auth, username, password);
       setView('ADMIN_DASHBOARD');
-      setLoginError('');
       setUsername('');
       setPassword('');
-    } else {
-      setLoginError('गलत विवरण। कृपया प्रशासन शाखामा सम्पर्क गर्नुहोस्।');
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setLoginError('गलत विवरण। कृपया आफ्नो इमेल र पासवर्ड जाँच गर्नुहोस्।');
     }
   };
 
-  const handleLogout = () => {
-    setIsAdmin(false);
-    setView('HOME');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setView('HOME');
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   const renderStaffSection = (title: string, filterCategory?: string) => {
@@ -186,16 +205,16 @@ const App: React.FC = () => {
                 )}
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="username" className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">प्रयोगकर्ताको नाम</label>
+                    <label htmlFor="username" className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">इमेल (Email)</label>
                     <input 
                       id="username"
                       name="username"
-                      type="text" 
+                      type="email" 
                       required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                      placeholder="Username"
+                      placeholder="admin@example.com"
                     />
                   </div>
                   <div>
