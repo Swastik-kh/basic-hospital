@@ -147,6 +147,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
   const [editingDoctorId, setEditingDoctorId] = useState<string | null>(null);
   const [editingNoticeId, setEditingNoticeId] = useState<string | null>(null);
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -400,39 +401,70 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     console.log("handleAddService called", newService);
     if (!newService.name || !newService.description) {
       console.log("Validation failed: name or description missing");
+      setStatusMessage({ type: 'error', text: 'कृपया सेवाको नाम र विवरण अनिवार्य भर्नुहोस्।' });
       return;
     }
     
     setIsSaving(true);
     setStatusMessage(null);
 
-    const item: Omit<Service, 'id'> = {
-      name: newService.name,
-      description: newService.description,
-      icon: newService.icon,
-      testRates: []
-    };
-    console.log("Attempting to add service to Firestore:", item);
     try {
-      try {
-        const docRef = await addDoc(collection(db, 'services'), item);
-        console.log("Service added with ID: ", docRef.id);
-      } catch (err) {
-        throw handleFirestoreError(err, OperationType.CREATE, 'services');
+      if (editingServiceId) {
+        console.log("Attempting to update service in Firestore:", editingServiceId, newService);
+        const docRef = doc(db, 'services', editingServiceId);
+        try {
+          await updateDoc(docRef, {
+            name: newService.name,
+            description: newService.description,
+            icon: newService.icon
+          });
+        } catch (err) {
+          console.error("Firestore update error:", err);
+          throw handleFirestoreError(err, OperationType.UPDATE, `services/${editingServiceId}`);
+        }
+        console.log("Service updated successfully");
+        await refetchData();
+        setStatusMessage({ type: 'success', text: 'सेवा सफलतापूर्वक अपडेट गरियो!' });
+      } else {
+        const item: Omit<Service, 'id'> = {
+          name: newService.name,
+          description: newService.description,
+          icon: newService.icon,
+          testRates: []
+        };
+        console.log("Attempting to add service to Firestore:", item);
+        try {
+          const docRef = await addDoc(collection(db, 'services'), item);
+          console.log("Service added with ID: ", docRef.id);
+        } catch (err) {
+          throw handleFirestoreError(err, OperationType.CREATE, 'services');
+        }
+        await refetchData();
+        setStatusMessage({ type: 'success', text: 'सेवा सफलतापूर्वक सुरक्षित गरियो!' });
       }
-      await refetchData();
-      setStatusMessage({ type: 'success', text: 'सेवा सफलतापूर्वक सुरक्षित गरियो!' });
       setTimeout(() => {
         setIsAdding(false);
         setIsSaving(false);
+        setEditingServiceId(null);
         setStatusMessage(null);
         setNewService({ name: '', description: '', icon: 'Stethoscope' });
       }, 2500);
     } catch (error) {
-      console.error("Error adding service: ", error);
+      console.error("Error adding/updating service: ", error);
       setStatusMessage({ type: 'error', text: 'सेवा सुरक्षित गर्दा त्रुटि भयो।' });
       setIsSaving(false);
     }
+  };
+
+  const handleEditService = (service: Service) => {
+    setEditingServiceId(service.id);
+    setStatusMessage(null);
+    setNewService({
+      name: service.name,
+      description: service.description,
+      icon: service.icon
+    });
+    setIsAdding(true);
   };
 
   const handleDeleteService = async (id: string) => {
@@ -572,12 +604,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const closeForm = () => {
     setIsAdding(false);
     setEditingDoctorId(null);
+    setEditingServiceId(null);
     setStatusMessage(null);
     setNewDoctor({ 
       name: '', specialization: '', level: '', department: '', 
-      availability: '', image: '', category: 'STAFF', featuredRole: '' 
+      availability: '', contactNumber: '', image: '', category: 'STAFF', featuredRole: '' 
     });
     setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
+    setNewService({ name: '', description: '', icon: 'Stethoscope' });
   };
 
   const navTabs = [
@@ -1168,6 +1202,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <td className="px-6 py-4 font-bold text-slate-900 text-sm">{service.name}</td>
                       <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[200px]">{service.description}</td>
                       <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                        <button onClick={() => handleEditService(service)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil size={18} /></button>
                         <button onClick={() => handleDeleteService(service.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={18} /></button>
                       </td>
                     </tr>
