@@ -41,8 +41,7 @@ const Notices: React.FC<NoticesProps> = ({ notices }) => {
                 {notice.pdfUrl && (
                   <a 
                     href={notice.pdfUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                    download
                     className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1 border border-orange-200 hover:bg-orange-200 transition-colors"
                   >
                     <FileDown size={12} /> डाउनलोड
@@ -62,12 +61,11 @@ const Notices: React.FC<NoticesProps> = ({ notices }) => {
                 {notice.pdfUrl && (
                   <a 
                     href={notice.pdfUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                    download
                     className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <FileDown size={16} /> PDF डाउनलोड
+                    <FileDown size={16} /> डाउनलोड
                   </a>
                 )}
               </div>
@@ -137,8 +135,7 @@ const Notices: React.FC<NoticesProps> = ({ notices }) => {
                   </div>
                   <a 
                     href={selectedNotice.pdfUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                    download
                     className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-md active:scale-95"
                   >
                     <FileDown size={20} /> डाउनलोड गर्नुहोस्
