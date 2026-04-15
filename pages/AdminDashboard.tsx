@@ -31,7 +31,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   updateDoctors,
   updateDownloads
 }) => {
-  const [activeTab, setActiveTab] = useState<'notices' | 'services' | 'doctors' | 'downloads'>('notices');
+  const [activeTab, setActiveTab] = useState<'notices' | 'services' | 'doctors' | 'downloads' | 'password'>('notices');
   const [isAdding, setIsAdding] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [newPassword, setNewPassword] = useState('');
@@ -39,16 +39,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth.currentUser) return;
+    console.log("handlePasswordChange called");
+    if (!auth.currentUser) {
+      console.log("No user logged in");
+      return;
+    }
     try {
+      console.log("Attempting reauthentication for:", auth.currentUser.email);
       const credential = EmailAuthProvider.credential(auth.currentUser.email!, currentPassword);
       await reauthenticateWithCredential(auth.currentUser, credential);
+      console.log("Reauthentication successful, updating password...");
       await updatePassword(auth.currentUser, newPassword);
+      console.log("Password update successful");
       setStatusMessage({ type: 'success', text: 'पासवर्ड सफलतापूर्वक परिवर्तन गरियो!' });
       setNewPassword('');
       setCurrentPassword('');
-    } catch (error) {
-      setStatusMessage({ type: 'error', text: 'पासवर्ड परिवर्तन गर्न सकिएन। कृपया पुरानो पासवर्ड सही छ भनी सुनिश्चित गर्नुहोस्।' });
+    } catch (error: any) {
+      console.error("Error in handlePasswordChange:", error);
+      setStatusMessage({ type: 'error', text: `पासवर्ड परिवर्तन गर्न सकिएन: ${error.message || 'त्रुटि भयो'}` });
     }
   };
   
