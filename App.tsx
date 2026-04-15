@@ -16,6 +16,7 @@ import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebas
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('HOME');
+  const [noticeId, setNoticeId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -27,6 +28,16 @@ const App: React.FC = () => {
     // Force logout on initial load so admin always has to enter password
     signOut(auth).catch(err => console.error("Initial logout error:", err));
 
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view') as ViewState;
+    if (viewParam) {
+      setView(viewParam);
+    }
+    const idParam = params.get('id');
+    if (idParam) {
+      setNoticeId(idParam);
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAdmin(true);
@@ -37,6 +48,13 @@ const App: React.FC = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('view', view);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+  }, [view]);
 
   useEffect(() => {
     const collections = [
@@ -164,9 +182,9 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (view) {
       case 'HOME':
-        return <Home notices={notices} services={services} doctors={doctors} setView={setView} />;
+        return <Home notices={notices} services={services} doctors={doctors} setView={setView} setNoticeId={setNoticeId} />;
       case 'NOTICES':
-        return <Notices notices={notices} />;
+        return <Notices notices={notices} noticeId={noticeId || undefined} />;
       case 'SERVICES':
         return <Services services={services} />;
       case 'DOWNLOADS':
@@ -249,7 +267,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans overflow-x-hidden">
-      {view !== 'ADMIN_DASHBOARD' && <Navbar currentView={view} setView={setView} isAdmin={isAdmin} />}
+      {view !== 'ADMIN_DASHBOARD' && <Navbar currentView={view} setView={setView} setNoticeId={setNoticeId} isAdmin={isAdmin} />}
       {view !== 'ADMIN_DASHBOARD' && (
         <div className="bg-blue-900 text-white py-2 overflow-hidden border-b border-blue-800">
           <div className="flex animate-marquee whitespace-nowrap">

@@ -9,9 +9,10 @@ interface HomeProps {
   services: Service[];
   doctors: Doctor[];
   setView: (view: any) => void;
+  setNoticeId: (id: string | null) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView }) => {
+const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView, setNoticeId }) => {
   const [aiQuery, setAiQuery] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [loading, setLoading] = useState(false);
@@ -158,7 +159,10 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView }) => {
                   </div>
                   <h4 
                     className="text-2xl font-black text-slate-900 mb-3 group-hover:text-blue-700 transition-colors leading-snug cursor-pointer"
-                    onClick={() => setView('NOTICES')}
+                    onClick={() => {
+                      setNoticeId(notice.id);
+                      setView('NOTICES');
+                    }}
                   >
                     {notice.title}
                   </h4>

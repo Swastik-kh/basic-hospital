@@ -8,10 +8,11 @@ import NepaliDate from 'nepali-date-converter';
 interface NavbarProps {
   currentView: ViewState;
   setView: (view: ViewState) => void;
+  setNoticeId: (id: string | null) => void;
   isAdmin: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ currentView, setView, isAdmin }) => {
+const Navbar: React.FC<NavbarProps> = ({ currentView, setView, setNoticeId, isAdmin }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [staffDropdownOpen, setStaffDropdownOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -77,7 +78,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, isAdmin }) => {
       <div className="bg-[#1e3a8a] text-white py-3 px-8 border-b border-white/10 shadow-md">
         <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
           {/* Logo and Name */}
-          <div className="flex items-center gap-4 cursor-pointer group" onClick={() => setView('HOME')}>
+          <div className="flex items-center gap-4 cursor-pointer group" onClick={() => { setView('HOME'); setNoticeId(null); }}>
             <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem" className="h-14 w-auto group-hover:scale-110 transition-transform" />
             <div className="flex flex-col items-start">
               <span className="text-[11px] font-black opacity-80 uppercase tracking-widest text-blue-200">चौदण्डीगढी नगरपालिका</span>
@@ -117,10 +118,10 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, isAdmin }) => {
       <nav className="bg-white text-slate-800 shadow-xl border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-8 flex items-center justify-between h-14">
           <div className="flex items-center space-x-1 h-full">
-            <button onClick={() => setView('HOME')} className={`px-4 h-full text-sm font-black border-b-4 transition-all ${currentView === 'HOME' ? 'border-blue-700 bg-blue-50 text-blue-700 shadow-inner' : 'border-transparent hover:bg-slate-50'}`}>गृहपृष्ठ</button>
+            <button onClick={() => { setView('HOME'); setNoticeId(null); }} className={`px-4 h-full text-sm font-black border-b-4 transition-all ${currentView === 'HOME' ? 'border-blue-700 bg-blue-50 text-blue-700 shadow-inner' : 'border-transparent hover:bg-slate-50'}`}>गृहपृष्ठ</button>
             
             {navItems.map((item) => (
-              <button key={item.label} onClick={() => setView(item.view)} className={`px-4 h-full text-sm font-black border-b-4 transition-all ${currentView === item.view ? 'border-blue-700 bg-blue-50 text-blue-700 shadow-inner' : 'border-transparent hover:bg-slate-50'}`}>
+              <button key={item.label} onClick={() => { setView(item.view); setNoticeId(null); }} className={`px-4 h-full text-sm font-black border-b-4 transition-all ${currentView === item.view ? 'border-blue-700 bg-blue-50 text-blue-700 shadow-inner' : 'border-transparent hover:bg-slate-50'}`}>
                 {item.label}
               </button>
             ))}
@@ -138,7 +139,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, isAdmin }) => {
                   {staffSubItems.map((sub) => (
                     <button
                       key={sub.label}
-                      onClick={() => { setView(sub.view); setStaffDropdownOpen(false); }}
+                      onClick={() => { setView(sub.view); setNoticeId(null); setStaffDropdownOpen(false); }}
                       className={`w-full text-left px-6 py-3 text-sm font-bold hover:bg-blue-50 hover:text-blue-700 transition-colors border-l-4 ${currentView === sub.view ? 'text-blue-700 bg-blue-50 border-blue-700' : 'text-slate-700 border-transparent'}`}
                     >
                       {sub.label}

@@ -5,10 +5,20 @@ import { Calendar, Tag, ChevronRight, X, Info, FileDown, FileText } from 'lucide
 
 interface NoticesProps {
   notices: Notice[];
+  noticeId?: string;
 }
 
-const Notices: React.FC<NoticesProps> = ({ notices }) => {
+const Notices: React.FC<NoticesProps> = ({ notices, noticeId }) => {
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+
+  useEffect(() => {
+    if (noticeId) {
+      const notice = notices.find(n => n.id === noticeId);
+      if (notice) {
+        setSelectedNotice(notice);
+      }
+    }
+  }, [noticeId, notices]);
 
   const closeModal = () => setSelectedNotice(null);
 
