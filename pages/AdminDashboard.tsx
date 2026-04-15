@@ -131,26 +131,35 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const handleAddDownload = () => {
+  const handleAddDownload = async () => {
     if (!newDownload.title || !newDownload.fileUrl) {
       alert('कृपया फाइलको शीर्षक र फाइल दुबै छान्नुहोस्।');
       return;
     }
-    const item: DownloadItem = {
-      id: Math.random().toString(36).substr(2, 9),
+    const item: Omit<DownloadItem, 'id'> = {
       title: newDownload.title,
       category: newDownload.category as any,
       fileUrl: newDownload.fileUrl,
       date: newDownload.date || new Date().toLocaleDateString('ne-NP').replace(/\//g, '-')
     };
-    updateDownloads([item, ...downloads]);
-    setIsAdding(false);
-    setNewDownload({ title: '', category: 'Form', fileUrl: '', fileName: '', date: '' });
+    try {
+      const docRef = await addDoc(collection(db, 'downloads'), item);
+      updateDownloads([{ id: docRef.id, ...item }, ...downloads]);
+      setIsAdding(false);
+      setNewDownload({ title: '', category: 'Form', fileUrl: '', fileName: '', date: '' });
+    } catch (error) {
+      console.error("Error adding download: ", error);
+    }
   };
 
-  const handleDeleteDownload = (id: string) => {
+  const handleDeleteDownload = async (id: string) => {
     if(confirm('के तपाईं यो फाइल हटाउन चाहनुहुन्छ?')) {
-      updateDownloads(downloads.filter(d => d.id !== id));
+      try {
+        await deleteDoc(doc(db, 'downloads', id));
+        updateDownloads(downloads.filter(d => d.id !== id));
+      } catch (error) {
+        console.error("Error deleting download: ", error);
+      }
     }
   };
 
@@ -165,23 +174,32 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const handleAddService = () => {
+  const handleAddService = async () => {
     if (!newService.name || !newService.description) return;
-    const item: Service = {
-      id: Math.random().toString(36).substr(2, 9),
+    const item: Omit<Service, 'id'> = {
       name: newService.name,
       description: newService.description,
       icon: newService.icon,
       testRates: []
     };
-    updateServices([...services, item]);
-    setIsAdding(false);
-    setNewService({ name: '', description: '', icon: 'Stethoscope' });
+    try {
+      const docRef = await addDoc(collection(db, 'services'), item);
+      updateServices([...services, { id: docRef.id, ...item }]);
+      setIsAdding(false);
+      setNewService({ name: '', description: '', icon: 'Stethoscope' });
+    } catch (error) {
+      console.error("Error adding service: ", error);
+    }
   };
 
-  const handleDeleteService = (id: string) => {
+  const handleDeleteService = async (id: string) => {
     if(confirm('के तपाईं यो सेवा हटाउन चाहनुहुन्छ?')) {
-      updateServices(services.filter(s => s.id !== id));
+      try {
+        await deleteDoc(doc(db, 'services', id));
+        updateServices(services.filter(s => s.id !== id));
+      } catch (error) {
+        console.error("Error deleting service: ", error);
+      }
     }
   };
 
@@ -200,23 +218,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setIsAdding(true);
   };
 
-  const handleAddDoctor = () => {
+  const handleAddDoctor = async () => {
     if (!newDoctor.name || !newDoctor.specialization) return;
     
-    let updatedDoctors = [...doctors];
-    
-    // Clear other officials if this one is set as a featured role (only one allowed per slot)
-    if (newDoctor.featuredRole) {
-      updatedDoctors = updatedDoctors.map(d => 
-        (d.featuredRole === newDoctor.featuredRole && d.id !== editingDoctorId) ? { ...d, featuredRole: undefined } : d
-      );
-    }
-
-    if (editingDoctorId) {
-      // Update existing
-      updatedDoctors = updatedDoctors.map(d => 
-        d.id === editingDoctorId ? {
-          ...d,
+    try {
+      if (editingDoctorId) {
+        // Update existing
+        const docRef = doc(db, 'doctors', editingDoctorId);
+        await updateDoc(docRef, {
           name: newDoctor.name,
           specialization: newDoctor.specialization,
           level: newDoctor.level,
@@ -225,36 +234,42 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           image: newDoctor.image,
           category: newDoctor.category as any,
           featuredRole: (newDoctor.featuredRole as any) || undefined
-        } : d
-      );
-    } else {
-      // Add new
-      const item: Doctor = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: newDoctor.name,
-        specialization: newDoctor.specialization,
-        level: newDoctor.level,
-        department: newDoctor.department,
-        availability: newDoctor.availability || 'संपर्क गर्नुहोस्',
-        image: newDoctor.image || 'https://picsum.photos/seed/doc/400/400',
-        category: newDoctor.category as any,
-        featuredRole: (newDoctor.featuredRole as any) || undefined
-      };
-      updatedDoctors.push(item);
+        });
+        updateDoctors(doctors.map(d => d.id === editingDoctorId ? { ...d, ...newDoctor } : d));
+      } else {
+        // Add new
+        const item: Omit<Doctor, 'id'> = {
+          name: newDoctor.name,
+          specialization: newDoctor.specialization,
+          level: newDoctor.level,
+          department: newDoctor.department,
+          availability: newDoctor.availability || 'संपर्क गर्नुहोस्',
+          image: newDoctor.image || 'https://picsum.photos/seed/doc/400/400',
+          category: newDoctor.category as any,
+          featuredRole: (newDoctor.featuredRole as any) || undefined
+        };
+        const docRef = await addDoc(collection(db, 'doctors'), item);
+        updateDoctors([...doctors, { id: docRef.id, ...item }]);
+      }
+      setIsAdding(false);
+      setEditingDoctorId(null);
+      setNewDoctor({ 
+        name: '', specialization: '', level: '', department: '', 
+        availability: '', image: '', category: 'STAFF', featuredRole: '' 
+      });
+    } catch (error) {
+      console.error("Error adding/updating doctor: ", error);
     }
-    
-    updateDoctors(updatedDoctors);
-    setIsAdding(false);
-    setEditingDoctorId(null);
-    setNewDoctor({ 
-      name: '', specialization: '', level: '', department: '', 
-      availability: '', image: '', category: 'STAFF', featuredRole: '' 
-    });
   };
 
-  const handleDeleteDoctor = (id: string) => {
+  const handleDeleteDoctor = async (id: string) => {
     if(confirm('के तपाईं यो कर्मचारीलाई हटाउन चाहनुहुन्छ? यो कार्य फिर्ता लिन सकिने छैन।')) {
-      updateDoctors(doctors.filter(d => d.id !== id));
+      try {
+        await deleteDoc(doc(db, 'doctors', id));
+        updateDoctors(doctors.filter(d => d.id !== id));
+      } catch (error) {
+        console.error("Error deleting doctor: ", error);
+      }
     }
   };
 

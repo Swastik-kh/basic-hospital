@@ -22,21 +22,28 @@ const App: React.FC = () => {
   const [downloads, setDownloads] = useState<DownloadItem[]>(INITIAL_DOWNLOADS);
 
   useEffect(() => {
-    const fetchNotices = async () => {
+    const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'notices'));
-        const fetchedNotices: Notice[] = [];
-        querySnapshot.forEach((doc) => {
-          fetchedNotices.push({ id: doc.id, ...doc.data() } as Notice);
-        });
-        if (fetchedNotices.length > 0) {
-          setNotices(fetchedNotices);
+        const collections = [
+          { name: 'notices', setter: setNotices },
+          { name: 'doctors', setter: setDoctors },
+          { name: 'services', setter: setServices },
+          { name: 'downloads', setter: setDownloads },
+        ];
+
+        for (const col of collections) {
+          const querySnapshot = await getDocs(collection(db, col.name));
+          const fetchedData: any[] = [];
+          querySnapshot.forEach((doc) => {
+            fetchedData.push({ id: doc.id, ...doc.data() });
+          });
+          col.setter(fetchedData);
         }
       } catch (error) {
-        console.error("Error fetching notices: ", error);
+        console.error("Error fetching data: ", error);
       }
     };
-    fetchNotices();
+    fetchData();
   }, []);
 
   const [username, setUsername] = useState('');
