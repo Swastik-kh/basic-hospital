@@ -39,9 +39,14 @@ const Notices: React.FC<NoticesProps> = ({ notices }) => {
                   </span>
                 </div>
                 {notice.pdfUrl && (
-                  <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1 border border-orange-200">
-                    <FileText size={12} /> PDF उपलब्ध
-                  </span>
+                  <a 
+                    href={notice.pdfUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1 border border-orange-200 hover:bg-orange-200 transition-colors"
+                  >
+                    <FileDown size={12} /> डाउनलोड
+                  </a>
                 )}
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-blue-700 transition-colors">{notice.title}</h3>
@@ -127,7 +132,7 @@ const Notices: React.FC<NoticesProps> = ({ notices }) => {
                     </div>
                     <div>
                       <h4 className="font-black text-slate-900">संलग्न कागजात उपलब्ध छ</h4>
-                      <p className="text-xs text-orange-700 font-bold uppercase tracking-wider">PDF format</p>
+                      <p className="text-xs text-orange-700 font-bold uppercase tracking-wider">संलग्न फाइल</p>
                     </div>
                   </div>
                   <a 
@@ -136,7 +141,7 @@ const Notices: React.FC<NoticesProps> = ({ notices }) => {
                     rel="noopener noreferrer"
                     className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-md active:scale-95"
                   >
-                    <FileDown size={20} /> PDF डाउनलोड गर्नुहोस्
+                    <FileDown size={20} /> डाउनलोड गर्नुहोस्
                   </a>
                 </div>
               )}
