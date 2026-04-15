@@ -918,7 +918,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                >
                  <option value="">None (Featured नगर्ने)</option>
                  <option value="CHAIRPERSON">अध्यक्ष (Chairperson Slot)</option>
-                 <option value="CHIEF">हालका प्रमुख (Chief Slot)</option>
+                 <option value="CHIEF">कार्यालय प्रमुख (Chief Slot)</option>
                  <option value="INFO_OFFICER">सूचना अधिकारी (Info Officer Slot)</option>
                </select>
                <div className="flex items-start gap-2 mt-3">
@@ -1168,7 +1168,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                            <p className="font-bold text-slate-900 text-sm">{doc.name}</p>
                            {doc.featuredRole && (
                              <span className="bg-yellow-100 text-yellow-700 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
-                               Featured: {doc.featuredRole === 'CHAIRPERSON' ? 'अध्यक्ष' : doc.featuredRole === 'CHIEF' ? 'प्रमुख' : 'सूचना'}
+                               Featured: {doc.featuredRole === 'CHAIRPERSON' ? 'अध्यक्ष' : doc.featuredRole === 'CHIEF' ? 'कार्यालय प्रमुख' : 'सूचना'}
                              </span>
                            )}
                         </div>

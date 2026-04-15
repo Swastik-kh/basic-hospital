@@ -205,7 +205,7 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, settings, setVi
                     <img src={chief.image} alt={chief.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                   </div>
                   <div>
-                    <span className="inline-block bg-green-50 text-green-700 px-2 py-0.5 rounded text-[10px] font-black uppercase mb-1">हालका प्रमुख</span>
+                    <span className="inline-block bg-green-50 text-green-700 px-2 py-0.5 rounded text-[10px] font-black uppercase mb-1">कार्यालय प्रमुख</span>
                     <h5 className="font-black text-slate-900 leading-tight">{chief.name}</h5>
                     <p className="text-[10px] font-bold text-slate-400 mt-1">{chief.specialization}</p>
                     {chief.contactNumber && <p className="text-[10px] font-bold text-green-600 mt-0.5">सम्पर्क: {chief.contactNumber}</p>}
