@@ -474,6 +474,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             level: newDoctor.level,
             department: newDoctor.department,
             availability: newDoctor.availability,
+            contactNumber: newDoctor.contactNumber,
             image: newDoctor.image,
             category: newDoctor.category as any,
             featuredRole: newDoctor.featuredRole || null
