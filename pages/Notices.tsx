@@ -114,7 +114,7 @@ const Notices: React.FC<NoticesProps> = ({ notices, noticeId }) => {
       {/* Notice Detail Modal */}
       {selectedNotice && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+          <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
             <div className="bg-blue-800 p-6 text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
                 <div className="bg-white/20 p-2 rounded-lg">

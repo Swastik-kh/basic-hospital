@@ -322,8 +322,15 @@ const App: React.FC = () => {
       {view !== 'ADMIN_DASHBOARD' && (
         <div className="bg-blue-900 text-white py-2 overflow-hidden border-b border-blue-800">
           <div className="flex animate-marquee whitespace-nowrap">
-            {notices.map((notice, index) => (
-              <div key={index} className="flex items-center gap-4 px-8">
+            {notices.map((notice) => (
+              <div 
+                key={notice.id} 
+                className="flex items-center gap-4 px-8 cursor-pointer hover:text-blue-200 transition-colors" 
+                onClick={() => {
+                  setNoticeId(notice.id);
+                  setView('NOTICES');
+                }}
+              >
                 <span className="font-black text-xs uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded">सूचना</span>
                 <span className="text-sm font-medium">{notice.title}</span>
               </div>
