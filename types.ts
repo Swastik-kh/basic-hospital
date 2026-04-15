@@ -29,6 +29,7 @@ export interface Doctor {
   level: string; // Added Level (तह)
   department: string; // Added Department (शाखा)
   availability: string;
+  contactNumber?: string; // Added Contact Number
   image: string;
   category?: 'CHIEF' | 'STAFF' | 'COMMITTEE' | 'FORMER';
   featuredRole?: 'CHAIRPERSON' | 'CHIEF' | 'INFO_OFFICER'; // Designated slot for Home Page

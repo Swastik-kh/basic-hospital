@@ -180,7 +180,7 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView, setNot
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="bg-blue-700 p-4 text-white text-center">
               <h4 className="font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2">
-                <UserCircle size={18} /> मुख्य पदाधिकारीहरू
+                <UserCircle size={18} /> पदाधिकारीहरू
               </h4>
             </div>
             <div className="p-6 space-y-6">
@@ -193,7 +193,7 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView, setNot
                     <span className="inline-block bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[10px] font-black uppercase mb-1">अध्यक्ष</span>
                     <h5 className="font-black text-slate-900 leading-tight">{chairperson.name}</h5>
                     <p className="text-[10px] font-bold text-slate-400 mt-1">{chairperson.specialization}</p>
-                    <p className="text-[10px] font-bold text-blue-600 mt-0.5">सम्पर्क: ९८XXXXXXXX</p>
+                    {chairperson.contactNumber && <p className="text-[10px] font-bold text-blue-600 mt-0.5">सम्पर्क: {chairperson.contactNumber}</p>}
                   </div>
                 </div>
               )}
@@ -207,7 +207,7 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView, setNot
                     <span className="inline-block bg-green-50 text-green-700 px-2 py-0.5 rounded text-[10px] font-black uppercase mb-1">हालका प्रमुख</span>
                     <h5 className="font-black text-slate-900 leading-tight">{chief.name}</h5>
                     <p className="text-[10px] font-bold text-slate-400 mt-1">{chief.specialization}</p>
-                    <p className="text-[10px] font-bold text-green-600 mt-0.5">सम्पर्क: ९८XXXXXXXX</p>
+                    {chief.contactNumber && <p className="text-[10px] font-bold text-green-600 mt-0.5">सम्पर्क: {chief.contactNumber}</p>}
                   </div>
                 </div>
               )}
@@ -221,7 +221,7 @@ const Home: React.FC<HomeProps> = ({ notices, services, doctors, setView, setNot
                     <span className="inline-block bg-orange-50 text-orange-700 px-2 py-0.5 rounded text-[10px] font-black uppercase mb-1">सूचना अधिकारी</span>
                     <h5 className="font-black text-slate-900 leading-tight">{infoOfficer.name}</h5>
                     <p className="text-[10px] font-bold text-slate-400 mt-1">{infoOfficer.department}</p>
-                    <p className="text-[10px] font-bold text-orange-600 mt-0.5">सम्पर्क: ९८XXXXXXXX</p>
+                    {infoOfficer.contactNumber && <p className="text-[10px] font-bold text-orange-600 mt-0.5">सम्पर्क: {infoOfficer.contactNumber}</p>}
                   </div>
                 </div>
               )}

@@ -160,7 +160,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [newService, setNewService] = useState({ name: '', description: '', icon: 'Stethoscope' });
   const [newDoctor, setNewDoctor] = useState({ 
     name: '', specialization: '', level: '', department: '', 
-    availability: '', image: '', category: 'STAFF', featuredRole: '' 
+    availability: '', contactNumber: '', image: '', category: 'STAFF', featuredRole: '' 
   });
   const [newDownload, setNewDownload] = useState({ title: '', category: 'Form', fileUrl: '', fileName: '', date: '' });
   
@@ -493,6 +493,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           level: newDoctor.level,
           department: newDoctor.department,
           availability: newDoctor.availability || 'संपर्क गर्नुहोस्',
+          contactNumber: newDoctor.contactNumber || '',
           image: newDoctor.image || 'https://picsum.photos/seed/doc/400/400',
           category: newDoctor.category as any,
           featuredRole: newDoctor.featuredRole || null
@@ -514,7 +515,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         setStatusMessage(null);
         setNewDoctor({ 
           name: '', specialization: '', level: '', department: '', 
-          availability: '', image: '', category: 'STAFF', featuredRole: '' 
+          availability: '', contactNumber: '', image: '', category: 'STAFF', featuredRole: '' 
         });
       }, 2500);
     } catch (error) {
@@ -871,6 +872,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 className="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-bold" 
                 value={newDoctor.availability} 
                 onChange={e => setNewDoctor({...newDoctor, availability: e.target.value})} 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">सम्पर्क नम्बर (Contact No.)</label>
+              <input 
+                type="text" 
+                placeholder="उदा: ९८XXXXXXXX" 
+                className="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-bold" 
+                value={newDoctor.contactNumber} 
+                onChange={e => setNewDoctor({...newDoctor, contactNumber: e.target.value})} 
               />
             </div>
             
