@@ -448,7 +448,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           throw handleFirestoreError(err, OperationType.UPDATE, `doctors/${editingDoctorId}`);
         }
         console.log("Doctor updated");
-        updateDoctors(doctors.map(d => d.id === editingDoctorId ? { ...d, ...newDoctor } : d));
+        await refetchData();
         setStatusMessage({ type: 'success', text: 'कर्मचारी सफलतापूर्वक अपडेट गरियो!' });
       } else {
         console.log("Attempting to add doctor to Firestore:", newDoctor);
