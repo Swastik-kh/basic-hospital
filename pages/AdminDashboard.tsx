@@ -113,7 +113,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleAddNotice = async () => {
-    if (!newNotice.title || !newNotice.content) return;
+    console.log("handleAddNotice called", newNotice);
+    if (!newNotice.title || !newNotice.content) {
+      console.log("Validation failed: title or content missing");
+      return;
+    }
     const item: Omit<Notice, 'id'> = {
       title: newNotice.title,
       content: newNotice.content,
@@ -121,8 +125,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       category: newNotice.category as any,
       pdfUrl: newNotice.pdfUrl.trim() || undefined
     };
+    console.log("Attempting to add notice to Firestore:", item);
     try {
       const docRef = await addDoc(collection(db, 'notices'), item);
+      console.log("Notice added with ID: ", docRef.id);
       updateNotices([{ id: docRef.id, ...item }, ...notices]);
       setIsAdding(false);
       setNewNotice({ title: '', content: '', date: '', category: 'General', pdfUrl: '', fileName: '' });
@@ -312,7 +318,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 placeholder="उदा: कर्मचारी आवश्यकता सम्बन्धी सूचना" 
                 className="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold bg-slate-50" 
                 value={newNotice.title} 
-                onChange={e => setNewNotice({...newNotice, title: e.target.value})} 
+                onChange={e => {
+                  console.log("Title changed:", e.target.value);
+                  setNewNotice({...newNotice, title: e.target.value});
+                }} 
               />
             </div>
 
@@ -374,7 +383,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 placeholder="यहाँ सूचनाको विस्तृत विवरण लेख्नुहोस्..." 
                 className="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] bg-slate-50 font-medium" 
                 value={newNotice.content} 
-                onChange={e => setNewNotice({...newNotice, content: e.target.value})} 
+                onChange={e => {
+                  console.log("Content changed:", e.target.value);
+                  setNewNotice({...newNotice, content: e.target.value});
+                }} 
               />
             </div>
 
